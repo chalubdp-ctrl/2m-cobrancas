@@ -1,84 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#667eea">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="2M Cobranças">
-<link rel="apple-touch-icon" href="logo.png">
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2M Sports Tour - Sistema de Cobrança</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="2M Cobranças">
+    <link rel="apple-touch-icon" href="logo.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        
-        /* TELA DE LOGIN */
-        .login-screen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 100%;
-        }
+        .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .login-box { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 400px; width: 100%; }
         .login-header { text-align: center; margin-bottom: 30px; }
         .login-header img { max-width: 200px; margin-bottom: 15px; }
         .login-header h1 { color: #2d3748; font-size: 1.8em; margin-bottom: 5px; }
         .login-header p { color: #718096; font-size: 0.95em; }
         .login-form .form-group { margin-bottom: 20px; }
         .login-form label { display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600; }
-        .login-form input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s;
-        }
+        .login-form input { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em; }
         .login-form input:focus { outline: none; border-color: #667eea; }
-        .login-form .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .login-form .btn-login:hover { transform: translateY(-2px); }
-        .login-error {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
+        .login-form .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; }
+        .login-error { background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; }
         .login-footer { text-align: center; margin-top: 20px; color: #718096; font-size: 0.85em; }
-        
-        /* SISTEMA PRINCIPAL */
         .app-container { display: none; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 30px; text-align: center; }
         .logo-container { margin-bottom: 20px; }
-        .logo-container img { max-width: 300px; width: 100%; height: auto; border-radius: 8px; }
+        .logo-container img { max-width: 300px; width: 100%; height: auto; }
         .company-title { color: #2d3748; font-size: 2.5em; font-weight: 700; margin-bottom: 10px; }
         .company-subtitle { color: #718096; font-size: 1.2em; }
         .user-info { background: #f7fafc; padding: 15px; border-radius: 8px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -96,12 +48,11 @@ if ('serviceWorker' in navigator) {
         .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
-        .btn { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: all 0.3s; margin-right: 8px; margin-top: 10px; }
+        .btn { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-right: 8px; margin-top: 10px; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-edit { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
         .btn-delete { background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); }
-        .btn-upload { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 15px; }
+        .btn-upload { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .btn-invoice { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
         .btn-stripe { background: linear-gradient(135deg, #635bff 0%, #4b44c9 100%); }
         .btn-asaas { background: linear-gradient(135deg, #20b26a 0%, #1a9b5a 100%); }
@@ -129,8 +80,9 @@ if ('serviceWorker' in navigator) {
         .invoice-box h3 { color: #667eea; margin-bottom: 15px; }
         .invoice-code { font-family: 'Courier New', monospace; font-size: 1.1em; font-weight: bold; color: #2d3748; background: white; padding: 12px; border-radius: 8px; margin: 10px 0; word-break: break-all; border: 1px dashed #667eea; }
         .copy-btn { background: #4299e1; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin-top: 10px; margin-right: 5px; }
-        .copy-btn:hover { background: #3182ce; }
         .success-msg { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #10b981; }
+        .error-msg { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc2626; }
+        .alert-warning { background: #fffbeb; border: 2px solid #fbbf24; color: #92400e; padding: 12px; border-radius: 8px; margin: 10px 0; }
         .tabs { display: flex; gap: 5px; margin-bottom: 25px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-wrap: wrap; }
         .tab { padding: 12px 24px; cursor: pointer; border: 2px solid transparent; border-radius: 8px; background: #f7fafc; font-size: 1em; font-weight: 600; color: #4a5568; transition: all 0.3s; }
         .tab:hover { background: #edf2f7; color: #667eea; }
@@ -145,13 +97,8 @@ if ('serviceWorker' in navigator) {
         .payment-option .icon { font-size: 2.5em; margin-bottom: 10px; }
         .payment-option .title { font-weight: 600; color: #2d3748; margin-bottom: 5px; }
         .payment-option .desc { font-size: 0.85em; color: #718096; }
-        .installment-info { background: #fff5f5; border: 2px solid #fc8181; border-radius: 12px; padding: 15px; margin: 15px 0; }
-        .installment-info h4 { color: #c53030; margin-bottom: 10px; }
-        .installment-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .installment-table th, .installment-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9em; }
-        .installment-table th { background: #f7fafc; font-weight: 600; }
-        .currency-selector { display: flex; gap: 10px; margin-bottom: 20px; }
-        .currency-btn { flex: 1; padding: 15px; border: 3px solid #e2e8f0; border-radius: 12px; cursor: pointer; background: white; font-weight: 600; transition: all 0.3s; text-align: left; display: flex; align-items: center; gap: 15px; }
+        .currency-selector { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .currency-btn { flex: 1; min-width: 150px; padding: 15px; border: 3px solid #e2e8f0; border-radius: 12px; cursor: pointer; background: white; font-weight: 600; transition: all 0.3s; text-align: left; display: flex; align-items: center; gap: 15px; }
         .currency-btn.active { border-color: #667eea; background: #f0f4ff; }
         .currency-btn:hover { border-color: #667eea; transform: translateY(-2px); }
         .currency-btn .flag { font-size: 2em; }
@@ -163,7 +110,6 @@ if ('serviceWorker' in navigator) {
         .pix-qr img { max-width: 250px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 10px; background: white; }
         .config-box { background: #fffbeb; border: 2px solid #fbbf24; border-radius: 12px; padding: 15px; margin: 15px 0; }
         .config-box h4 { color: #92400e; margin-bottom: 10px; }
-        .alert-warning { background: #fffbeb; border: 2px solid #fbbf24; color: #92400e; padding: 12px; border-radius: 8px; margin: 10px 0; }
         .config-status { background: #d1fae5; border: 2px solid #10b981; color: #065f46; padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: 600; }
         .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); display: flex; align-items: center; justify-content: center; border-radius: 16px; z-index: 100; font-size: 1.2em; font-weight: 600; color: #667eea; flex-direction: column; gap: 15px; }
         .loading-overlay .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -177,23 +123,22 @@ if ('serviceWorker' in navigator) {
             <div class="login-header">
                 <img src="logo.png" alt="2M Sports Tour" onerror="this.style.display='none'">
                 <h1>2M Sports Tour</h1>
-                <p>Sistema de Gestão de Cobrança</p>
+                <p>Sistema de Gestão de Cobrança Internacional</p>
             </div>
             <div class="login-error" id="loginError"></div>
-            <form class="login-form" onsubmit="fazerLogin(event)">
+            <form class="login-form" id="loginForm">
                 <div class="form-group">
                     <label> Usuário</label>
-                    <input type="text" id="loginUser" placeholder="Digite seu usuário" required autocomplete="username">
+                    <input type="text" id="loginUser" placeholder="Digite seu usuário" required>
                 </div>
                 <div class="form-group">
                     <label>🔒 Senha</label>
-                    <input type="password" id="loginPass" placeholder="Digite sua senha" required autocomplete="current-password">
+                    <input type="password" id="loginPass" placeholder="Digite sua senha" required>
                 </div>
                 <button type="submit" class="btn-login">🔐 Entrar no Sistema</button>
             </form>
             <div class="login-footer">
                 <p>© 2024 2M Sports Tour - Todos os direitos reservados</p>
-                <p style="margin-top:10px; font-size:0.8em;">Sistema protegido por autenticação</p>
             </div>
         </div>
     </div>
@@ -209,7 +154,7 @@ if ('serviceWorker' in navigator) {
                 <input type="file" id="logoInput" accept="image/*" onchange="uploadLogo(event)">
                 <div class="user-info">
                     <span>👤 Usuário: <strong id="currentUser">-</strong></span>
-                    <button class="btn-logout" onclick="fazerLogout()"> Sair</button>
+                    <button class="btn-logout" onclick="fazerLogout()">🚪 Sair</button>
                 </div>
             </div>
 
@@ -223,13 +168,13 @@ if ('serviceWorker' in navigator) {
             <div class="tabs">
                 <button class="tab active" onclick="showTab('clientes', this)">👥 Clientes</button>
                 <button class="tab" onclick="showTab('devedores', this)">💰 Devedores</button>
-                <button class="tab" onclick="showTab('cobrancas', this)"> Cobranças</button>
+                <button class="tab" onclick="showTab('cobrancas', this)">💳 Cobranças</button>
                 <button class="tab" onclick="showTab('config', this)">⚙️ Configurações</button>
             </div>
 
             <div id="tab-clientes" class="tab-content active">
                 <div class="card">
-                    <h2>📝 Cadastrar Novo Credor (Cliente)</h2>
+                    <h2> Cadastrar Novo Credor (Cliente)</h2>
                     <div class="form-row">
                         <div class="form-group"><label>Nome *</label><input type="text" id="clientName" placeholder="Ex: Empresa Exemplo Ltda"></div>
                         <div class="form-group"><label>País *</label><select id="clientCountry"><option value="Brasil">Brasil</option><option value="USA">USA (Orlando/EUA)</option><option value="Portugal">Portugal</option><option value="Outro">Outro</option></select></div>
@@ -258,7 +203,7 @@ if ('serviceWorker' in navigator) {
                     </div>
                     <div class="form-row">
                         <div class="form-group"><label>Valor *</label><input type="text" id="debtAmount" placeholder="0,00"></div>
-                        <div class="form-group"><label>Moeda *</label><select id="debtCurrency"><option value="BRL">Real (BRL - R$)</option><option value="USD">Dólar (USD - $)</option></select></div>
+                        <div class="form-group"><label>Moeda *</label><select id="debtCurrency"><option value="BRL">Real (BRL - R$)</option><option value="USD">Dólar (USD - $)</option><option value="EUR">Euro (EUR - €)</option></select></div>
                     </div>
                     <div class="form-row">
                         <div class="form-group"><label>Vencimento *</label><input type="date" id="debtDueDate"></div>
@@ -270,7 +215,7 @@ if ('serviceWorker' in navigator) {
                     <input type="hidden" id="editDebtorId"><input type="hidden" id="editDebtId">
                 </div>
                 <div class="card">
-                    <h2> Devedores Cadastrados</h2>
+                    <h2>📊 Devedores Cadastrados</h2>
                     <div class="table-container"><table><thead><tr><th>DEVEDOR</th><th>DOCUMENTO</th><th>CREDOR</th><th>VALOR</th><th>VENCIMENTO</th><th>STATUS</th><th>AÇÕES</th></tr></thead><tbody id="tabelaDevedores"></tbody></table></div>
                 </div>
             </div>
@@ -317,43 +262,64 @@ if ('serviceWorker' in navigator) {
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const WORKER_URL = 'https://2m-stripe-checkout.chalubdp.workers.dev';
 
-        // ============ USUÁRIOS CADASTRADOS ============
-        // EDITE AQUI PARA ADICIONAR/REMOVER USUÁRIOS
         const USUARIOS_CADASTRADOS = {
             'admin': 'admin123',
             'maira': 'maira1103',
             'diogo': 'diogo0510'
         };
 
+        // ✅ CONFIGURAÇÃO DAS 3 MOEDAS - 2M SPORTS TOUR
         const PAYMENT_CONFIG = {
-            BRL: { maxInstallments: 10, interestRate: 1.99, currency: 'BRL', symbol: 'R$', methods: ['pix', 'boleto', 'credit_card'], bank: 'Banco Inter (via Asaas)', bankDetails: 'PIX / Boleto / Cartão - Brasil' },
-            USD: { maxInstallments: 5, interestRate: 0, currency: 'USD', symbol: '$', methods: ['zelle', 'cartao'], bank: 'Bank of America (via Stripe)', bankDetails: 'Zelle / Cartão - USA' }
+            BRL: { 
+                maxInstallments: 12, 
+                interestRate: 1.99, 
+                currency: 'BRL', 
+                symbol: 'R$', 
+                methods: ['pix', 'boleto', 'credit_card'], 
+                gateway: 'Asaas (Banco Inter)',
+                flag: '🇧🇷'
+            },
+            USD: { 
+                maxInstallments: 1, 
+                interestRate: 0, 
+                currency: 'USD', 
+                symbol: 'US$', 
+                methods: ['credit_card'], 
+                gateway: 'Stripe (Internacional)',
+                flag: '🇺🇸'
+            },
+            EUR: { 
+                maxInstallments: 1, 
+                interestRate: 0, 
+                currency: 'EUR', 
+                symbol: '€', 
+                methods: ['credit_card'], 
+                gateway: 'Stripe (Internacional)',
+                flag: '🇪'
+            }
         };
 
         // ============ AUTENTICAÇÃO ============
         window.onload = function() {
             const usuarioLogado = localStorage.getItem('usuarioLogado');
-            if (usuarioLogado) {
-                mostrarSistema(usuarioLogado);
-            }
+            if (usuarioLogado) mostrarSistema(usuarioLogado);
         };
 
-        function fazerLogin(event) {
-            event.preventDefault();
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             const user = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value;
             const errorDiv = document.getElementById('loginError');
 
             if (USUARIOS_CADASTRADOS[user] && USUARIOS_CADASTRADOS[user] === pass) {
                 localStorage.setItem('usuarioLogado', user);
-                localStorage.setItem('loginTime', new Date().toISOString());
                 mostrarSistema(user);
             } else {
                 errorDiv.textContent = '❌ Usuário ou senha incorretos!';
                 errorDiv.style.display = 'block';
                 setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
             }
-        }
+        });
 
         function mostrarSistema(usuario) {
             document.getElementById('loginScreen').style.display = 'none';
@@ -366,7 +332,6 @@ if ('serviceWorker' in navigator) {
         function fazerLogout() {
             if (confirm('Deseja realmente sair do sistema?')) {
                 localStorage.removeItem('usuarioLogado');
-                localStorage.removeItem('loginTime');
                 location.reload();
             }
         }
@@ -388,12 +353,12 @@ if ('serviceWorker' in navigator) {
         function salvarConfig(tipo) {
             if (tipo === 'pixKey') {
                 const v = document.getElementById('configPixKey').value.trim();
-                if (!v) { alert('⚠️ Digite a chave PIX!'); return; }
+                if (!v) { alert('️ Digite a chave PIX!'); return; }
                 localStorage.setItem('pixKey', v);
                 mostrarMsg('✅ Chave PIX salva!'); carregarConfigs();
             } else {
                 const v = document.getElementById('configZelleEmail').value.trim();
-                if (!v) { alert('⚠️ Digite o email Zelle!'); return; }
+                if (!v) { alert('️ Digite o email Zelle!'); return; }
                 localStorage.setItem('zelleEmail', v);
                 mostrarMsg('✅ Email Zelle salvo!'); carregarConfigs();
             }
@@ -485,7 +450,6 @@ if ('serviceWorker' in navigator) {
                 document.getElementById('editClientId').value = data.id;
                 document.getElementById('btnSalvarCliente').textContent = '💾 Atualizar';
                 document.getElementById('btnCancelarCliente').style.display = 'inline-block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
         function cancelarEdicaoCliente() { limparFormCliente(); }
@@ -498,7 +462,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('btnCancelarCliente').style.display = 'none';
         }
         async function excluirCliente(id) {
-            if (!confirm('⚠️ Excluir este credor e todos os registros vinculados?')) return;
+            if (!confirm('️ Excluir este credor e todos os registros vinculados?')) return;
             try {
                 const { data: debtors } = await supabaseClient.from('debtors').select('id').eq('client_id', id);
                 if (debtors) for (const d of debtors) { await supabaseClient.from('debts').delete().eq('debtor_id', d.id); await supabaseClient.from('debtors').delete().eq('id', d.id); }
@@ -516,7 +480,7 @@ if ('serviceWorker' in navigator) {
             if (!data || data.length === 0) { t.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum credor.</td></tr>'; document.getElementById('totalClientes').textContent = '0'; return; }
             document.getElementById('totalClientes').textContent = data.length;
             data.forEach(c => {
-                t.innerHTML += `<tr><td><strong>${c.name}</strong></td><td>${c.country}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td class="action-buttons"><button class="btn btn-edit btn-small" onclick="editarCliente('${c.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirCliente('${c.id}')">🗑️ Excluir</button></td></tr>`;
+                t.innerHTML += `<tr><td><strong>${c.name}</strong></td><td>${c.country}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td class="action-buttons"><button class="btn btn-edit btn-small" onclick="editarCliente('${c.id}')">️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirCliente('${c.id}')">🗑️ Excluir</button></td></tr>`;
                 s.innerHTML += `<option value="${c.id}">${c.name} (${c.country})</option>`;
             });
         }
@@ -535,9 +499,9 @@ if ('serviceWorker' in navigator) {
             const eDtId = document.getElementById('editDebtId').value;
             const amt = parseFloat(amtStr.replace(',', '.'));
             if (!client_id) { alert('⚠️ Selecione o Credor!'); return; }
-            if (!name) { alert('️ Preencha o Nome!'); return; }
-            if (!amtStr || isNaN(amt) || amt <= 0) { alert('️ Valor inválido!'); return; }
-            if (!due) { alert('⚠️ Preencha a Data!'); return; }
+            if (!name) { alert('⚠️ Preencha o Nome!'); return; }
+            if (!amtStr || isNaN(amt) || amt <= 0) { alert('⚠️ Valor inválido!'); return; }
+            if (!due) { alert('️ Preencha a Data!'); return; }
             try {
                 if (eDId && eDtId) {
                     const { error: e1 } = await supabaseClient.from('debtors').update({ client_id, name, document: doc || null }).eq('id', eDId);
@@ -574,7 +538,6 @@ if ('serviceWorker' in navigator) {
                 }
                 document.getElementById('btnSalvarDevedor').textContent = '✅ Atualizar';
                 document.getElementById('btnCancelarDevedor').style.display = 'inline-block';
-                window.scrollTo({ top: document.querySelector('#tab-devedores .card').offsetTop - 20, behavior: 'smooth' });
             } catch (e) { alert('Erro: ' + e.message); }
         }
         function cancelarEdicaoDevedor() { limparFormDevedor(); }
@@ -605,7 +568,7 @@ if ('serviceWorker' in navigator) {
             t.innerHTML = '';
             if (!data || data.length === 0) { t.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhum devedor.</td></tr>'; document.getElementById('totalDevedores').textContent = '0'; document.getElementById('totalDividas').textContent = 'R$ 0'; return; }
             document.getElementById('totalDevedores').textContent = data.length;
-            let tB = 0, tU = 0;
+            let tB = 0, tU = 0, tE = 0;
             for (const d of data) {
                 const { data: cd } = await supabaseClient.from('clients').select('name').eq('id', d.client_id).single();
                 const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', d.id).limit(1);
@@ -613,17 +576,19 @@ if ('serviceWorker' in navigator) {
                 const dt = ds && ds.length > 0 ? ds[0] : null;
                 let ad = '-', sc = 'badge-pendente', st = 'Pendente', dd = '-';
                 if (dt) {
-                    const sym = dt.currency === 'USD' ? '$' : 'R$';
+                    const sym = dt.currency === 'USD' ? '$' : dt.currency === 'EUR' ? '€' : 'R$';
                     const v = dt.original_amount || dt.amount || 0;
                     ad = `${sym} ${parseFloat(v).toFixed(2)}`;
                     if (dt.status === 'Pago') { sc = 'badge-pago'; st = 'Pago'; }
                     else if (dt.status === 'Vencido') { sc = 'badge-vencido'; st = 'Vencido'; }
                     if (dt.due_date) dd = new Date(dt.due_date).toLocaleDateString('pt-BR');
-                    if (dt.currency === 'BRL') tB += parseFloat(v); else if (dt.currency === 'USD') tU += parseFloat(v);
+                    if (dt.currency === 'BRL') tB += parseFloat(v);
+                    else if (dt.currency === 'USD') tU += parseFloat(v);
+                    else if (dt.currency === 'EUR') tE += parseFloat(v);
                 }
-                t.innerHTML += `<tr><td><strong>${d.name}</strong></td><td>${d.document || '-'}</td><td>${cn}</td><td><strong>${ad}</strong></td><td>${dd}</td><td><span class="badge ${sc}">${st}</span></td><td class="action-buttons"><button class="btn btn-invoice btn-small" onclick="gerarCobranca('${d.id}')">💳 Cobrar</button><button class="btn btn-edit btn-small" onclick="editarDevedor('${d.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirDevedor('${d.id}')">🗑️ Excluir</button></td></tr>`;
+                t.innerHTML += `<tr><td><strong>${d.name}</strong></td><td>${d.document || '-'}</td><td>${cn}</td><td><strong>${ad}</strong></td><td>${dd}</td><td><span class="badge ${sc}">${st}</span></td><td class="action-buttons"><button class="btn btn-invoice btn-small" onclick="gerarCobranca('${d.id}')"> Cobrar</button><button class="btn btn-edit btn-small" onclick="editarDevedor('${d.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirDevedor('${d.id}')">🗑️ Excluir</button></td></tr>`;
             }
-            document.getElementById('totalDividas').textContent = `R$ ${tB.toFixed(2)} + $ ${tU.toFixed(2)}`;
+            document.getElementById('totalDividas').textContent = `R$ ${tB.toFixed(2)} | $ ${tU.toFixed(2)} | € ${tE.toFixed(2)}`;
         }
 
         // ============ COBRANÇAS ============
@@ -635,7 +600,7 @@ if ('serviceWorker' in navigator) {
                 if (!ds || ds.length === 0) { alert('⚠️ Nenhuma dívida!'); return; }
                 const dt = ds[0];
                 const amt = dt.original_amount || dt.amount;
-                const cur = dt.currency;
+                const cur = dt.currency || 'BRL';
                 const cfg = PAYMENT_CONFIG[cur] || PAYMENT_CONFIG.BRL;
                 const html = `
                     <h2>💳 Gerar Cobrança</h2>
@@ -645,10 +610,17 @@ if ('serviceWorker' in navigator) {
                         <p><strong>Valor:</strong> ${cfg.symbol} ${parseFloat(amt).toFixed(2)} ${cur}</p>
                         <p><strong>Vencimento:</strong> ${new Date(dt.due_date).toLocaleDateString('pt-BR')}</p>
                     </div>
-                    <h3>💰 Selecione a Moeda</h3>
+                    <h3>💰 Selecione a Moeda de Cobrança</h3>
                     <div class="currency-selector">
-                        <button class="currency-btn ${cur === 'BRL' ? 'active' : ''}" onclick="selecionarMoeda('BRL', '${debtorId}', this)"><span class="flag">🇧🇷</span><div><strong>Real (BRL)</strong><div class="bank">${PAYMENT_CONFIG.BRL.bank}</div></div></button>
-                        <button class="currency-btn ${cur === 'USD' ? 'active' : ''}" onclick="selecionarMoeda('USD', '${debtorId}', this)"><span class="flag">🇺🇸</span><div><strong>Dólar (USD)</strong><div class="bank">${PAYMENT_CONFIG.USD.bank}</div></div></button>
+                        <button class="currency-btn ${cur === 'BRL' ? 'active' : ''}" onclick="selecionarMoeda('BRL', '${debtorId}', this)">
+                            <span class="flag">🇧🇷</span><div><strong>Real (BRL)</strong><div class="bank">${PAYMENT_CONFIG.BRL.gateway}</div></div>
+                        </button>
+                        <button class="currency-btn ${cur === 'USD' ? 'active' : ''}" onclick="selecionarMoeda('USD', '${debtorId}', this)">
+                            <span class="flag">🇺🇸</span><div><strong>Dólar (USD)</strong><div class="bank">${PAYMENT_CONFIG.USD.gateway}</div></div>
+                        </button>
+                        <button class="currency-btn ${cur === 'EUR' ? 'active' : ''}" onclick="selecionarMoeda('EUR', '${debtorId}', this)">
+                            <span class="flag">🇪</span><div><strong>Euro (EUR)</strong><div class="bank">${PAYMENT_CONFIG.EUR.gateway}</div></div>
+                        </button>
                     </div>
                     <div id="paymentOptions"></div>
                 `;
@@ -662,22 +634,20 @@ if ('serviceWorker' in navigator) {
             document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
             const cfg = PAYMENT_CONFIG[cur];
-            let html = `<h3>💳 Método de Pagamento</h3><div class="bank-info"><h4><span class="flag">${cur === 'BRL' ? '🇧' : '🇺🇸'}</span> ${cfg.bank}</h4><p>${cfg.bankDetails}</p></div><div class="payment-options">`;
-            const icons = { pix: '📱', boleto: '📄', credit_card: '💳', zelle: '🔄', cartao: '💳' };
-            const titles = { pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito', zelle: 'Zelle', cartao: 'Cartão de Crédito' };
-            const descs = { pix: 'Instantâneo', boleto: '3-5 dias', credit_card: `Até ${cfg.maxInstallments}x`, zelle: 'Transferência rápida', cartao: `Até ${cfg.maxInstallments}x` };
+            let html = `<h3>💳 Método de Pagamento</h3><div class="bank-info"><h4><span class="flag">${cfg.flag}</span> ${cfg.gateway}</h4><p>Moeda: ${cfg.currency} | Parcelas máx: ${cfg.maxInstallments}x</p></div><div class="payment-options">`;
+            const icons = { pix: '📱', boleto: '📄', credit_card: '', cartao: '💳' };
+            const titles = { pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito', cartao: 'Cartão de Crédito' };
+            const descs = { pix: 'Instantâneo', boleto: '3-5 dias', credit_card: `Até ${cfg.maxInstallments}x`, cartao: `Até ${cfg.maxInstallments}x` };
             cfg.methods.forEach(m => { html += `<div class="payment-option" onclick="selecionarPagamento('${m}', '${cur}', '${debtorId}', this)"><div class="icon">${icons[m]}</div><div class="title">${titles[m]}</div><div class="desc">${descs[m]}</div></div>`; });
             html += `</div><div id="installmentOptions"></div>`;
             document.getElementById('paymentOptions').innerHTML = html;
         }
 
         function selecionarPagamento(method, currency, debtorId, el) {
-            try {
-                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-                el.classList.add('selected');
-                if (method === 'cartao' || method === 'credit_card') mostrarParcelas(currency, debtorId);
-                else processarPagamento(method, currency, debtorId, 1);
-            } catch (e) { alert('Erro: ' + e.message); }
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            if (method === 'credit_card' || method === 'cartao') mostrarParcelas(currency, debtorId);
+            else processarPagamento(method, currency, debtorId, 1);
         }
 
         function mostrarParcelas(currency, debtorId) {
@@ -685,11 +655,11 @@ if ('serviceWorker' in navigator) {
             supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1).then(({ data: ds }) => {
                 if (!ds || ds.length === 0) { alert('Erro ao buscar dívida'); return; }
                 const amt = ds[0].original_amount || ds[0].amount;
-                let html = `<div class="installment-info"><h4>💳 Parcelamento (${cfg.symbol} ${currency}) - Juros: ${cfg.interestRate}% a.m.</h4><table class="installment-table"><thead><tr><th>Parcelas</th><th>Valor Parcela</th><th>Total</th><th>Juros</th></tr></thead><tbody>`;
+                let html = `<div class="installment-info" style="background:#fff5f5; border:2px solid #fc8181; border-radius:12px; padding:15px; margin:15px 0;"><h4 style="color:#c53030; margin-bottom:10px;"> Parcelamento (${cfg.symbol} ${currency}) - Juros: ${cfg.interestRate}% a.m.</h4><table class="installment-table" style="width:100%; border-collapse:collapse; margin-top:10px;"><thead><tr><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Parcelas</th><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Valor Parcela</th><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Total</th><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Juros</th></tr></thead><tbody>`;
                 for (let i = 1; i <= cfg.maxInstallments; i++) {
                     const j = cfg.interestRate > 0 ? amt * Math.pow(1 + cfg.interestRate/100, i) - amt : 0;
                     const t = amt + j; const p = t / i;
-                    html += `<tr><td><strong>${i}x</strong></td><td>${cfg.symbol} ${p.toFixed(2)}</td><td>${cfg.symbol} ${t.toFixed(2)}</td><td>${cfg.symbol} ${j.toFixed(2)}</td></tr>`;
+                    html += `<tr><td style="padding:8px; border-bottom:1px solid #e2e8f0;"><strong>${i}x</strong></td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${cfg.symbol} ${p.toFixed(2)}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${cfg.symbol} ${t.toFixed(2)}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${cfg.symbol} ${j.toFixed(2)}</td></tr>`;
                 }
                 html += `</tbody></table><br><label><strong>Selecione as parcelas:</strong></label><select id="numParcelas" style="width:100%; padding:10px; margin-top:10px; border:2px solid #e2e8f0; border-radius:8px;">`;
                 for (let i = 1; i <= cfg.maxInstallments; i++) html += `<option value="${i}">${i}x de ${cfg.symbol} ${(amt/i).toFixed(2)}</option>`;
@@ -712,12 +682,12 @@ if ('serviceWorker' in navigator) {
             const total = amt + j;
             const code = 'INV-' + Date.now().toString().slice(-8);
 
-            const { error: dbE } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: 'cartao', amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: iN, interest_rate: cfg.interestRate, total_amount: total, installment_value: total / iN, bank_account: 'Bank of America (Stripe)' }]);
+            const { error: dbE } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: 'cartao', amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: iN, interest_rate: cfg.interestRate, total_amount: total, installment_value: total / iN, bank_account: cfg.gateway }]);
             if (dbE) { alert('❌ Erro: ' + dbE.message); return; }
 
             mostrarLoading();
             try {
-                const resp = await fetch(`${WORKER_URL}/create-checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: total, currency, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, installments: iN, interestRate: cfg.interestRate }) });
+                const resp = await fetch(`${WORKER_URL}/create-stripe-checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: total, currency, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, installments: iN, interestRate: cfg.interestRate }) });
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.error || 'Erro ao criar checkout');
                 await supabaseClient.from('invoices').update({ invoice_url: data.url, stripe_session_id: data.sessionId }).eq('invoice_code', code);
@@ -740,8 +710,8 @@ if ('serviceWorker' in navigator) {
             const total = amt + j;
             const code = 'INV-' + Date.now().toString().slice(-8);
 
-            const { error: dbE } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: 'credit_card', amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: iN, interest_rate: cfg.interestRate, total_amount: total, installment_value: total / iN, bank_account: 'Banco Inter (Asaas)' }]);
-            if (dbE) { alert(' Erro: ' + dbE.message); return; }
+            const { error: dbE } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: 'credit_card', amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: iN, interest_rate: cfg.interestRate, total_amount: total, installment_value: total / iN, bank_account: cfg.gateway }]);
+            if (dbE) { alert('❌ Erro: ' + dbE.message); return; }
 
             const cName = prompt('Nome do pagador:', d.name) || d.name;
             const cEmail = prompt('Email do pagador:', c.email || '') || 'contato@2msports.com';
@@ -754,7 +724,7 @@ if ('serviceWorker' in navigator) {
                 if (!resp.ok) throw new Error(data.error || 'Erro Asaas');
                 const link = data.paymentLink || data.checkoutUrl || `https://www.asaas.com/c/${data.paymentId}`;
                 await supabaseClient.from('invoices').update({ invoice_url: link, asaas_payment_id: data.paymentId }).eq('invoice_code', code);
-                const html = `<h2>✅ Cobrança Gerada!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Credor:</strong> ${c.name}</p><p><strong>Valor:</strong> ${cfg.symbol} ${total.toFixed(2)}</p>${iN > 1 ? `<p><strong>Parcelas:</strong> ${iN}x de ${cfg.symbol} ${(total/iN).toFixed(2)}</p>` : ''}</div><div class="invoice-box"><h3> Link de Pagamento</h3><div class="invoice-code">${link}</div><button class="copy-btn" onclick="copiarLink('${link}')"> Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${link}', '_blank')">💳 Abrir Pagamento</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${link}', '${cfg.symbol} ${total.toFixed(2)}')">📱 WhatsApp</button></div><div class="success-msg">✅ Cobrança registrada via Asaas!</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
+                const html = `<h2>✅ Cobrança Gerada!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Credor:</strong> ${c.name}</p><p><strong>Valor:</strong> ${cfg.symbol} ${total.toFixed(2)}</p>${iN > 1 ? `<p><strong>Parcelas:</strong> ${iN}x de ${cfg.symbol} ${(total/iN).toFixed(2)}</p>` : ''}</div><div class="invoice-box"><h3>🔗 Link de Pagamento</h3><div class="invoice-code">${link}</div><button class="copy-btn" onclick="copiarLink('${link}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${link}', '_blank')">💳 Abrir Pagamento</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${link}', '${cfg.symbol} ${total.toFixed(2)}')">📱 WhatsApp</button></div><div class="success-msg">✅ Cobrança registrada via Asaas!</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
                 document.getElementById('conteudoCobranca').innerHTML = html;
                 carregarCobrancas();
             } catch (e) { alert('❌ Erro: ' + e.message); }
@@ -769,49 +739,53 @@ if ('serviceWorker' in navigator) {
                 const dt = ds[0]; const amt = dt.original_amount || dt.amount;
                 const cfg = PAYMENT_CONFIG[currency];
                 const code = 'INV-' + Date.now().toString().slice(-8);
-                const bank = currency === 'BRL' ? 'Banco Inter (Asaas)' : 'Bank of America (Stripe)';
 
-                const { error } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: method, amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: 1, interest_rate: 0, total_amount: amt, installment_value: amt, bank_account: bank }]);
+                const { error } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: method, amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: 1, interest_rate: 0, total_amount: amt, installment_value: amt, bank_account: cfg.gateway }]);
                 if (error) throw error;
 
                 mostrarLoading();
                 try {
-                    const resp = await fetch(`${WORKER_URL}/create-asaas`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, paymentMethod: method, customerName: d.name, customerEmail: c.email || 'contato@2msports.com', customerCpfCnpj: d.document || '00000000000', installments: 1 }) });
-                    const data = await resp.json();
-                    if (!resp.ok) throw new Error(data.error || 'Erro ao gerar pagamento');
+                    // Se for BRL, usa Asaas
+                    if (currency === 'BRL') {
+                        const resp = await fetch(`${WORKER_URL}/create-asaas`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, paymentMethod: method, customerName: d.name, customerEmail: c.email || 'contato@2msports.com', customerCpfCnpj: d.document || '00000000000', installments: 1 }) });
+                        const data = await resp.json();
+                        if (!resp.ok) throw new Error(data.error || 'Erro ao gerar pagamento');
 
-                    await supabaseClient.from('invoices').update({ asaas_payment_id: data.paymentId, invoice_url: data.boletoLink || data.paymentLink || data.checkoutUrl || '' }).eq('invoice_code', code);
+                        await supabaseClient.from('invoices').update({ asaas_payment_id: data.paymentId, invoice_url: data.boletoViewUrl || data.paymentLink || data.pixPayload || '' }).eq('invoice_code', code);
 
-                    const pixKey = localStorage.getItem('pixKey') || '';
-                    const zelleEmail = localStorage.getItem('zelleEmail') || '';
+                        const pixKey = localStorage.getItem('pixKey') || '';
 
-                    let html = `<h2>✅ Cobrança Gerada!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Credor:</strong> ${c.name}</p><p><strong>Método:</strong> ${method.toUpperCase()}</p><p><strong>Valor:</strong> ${cfg.symbol} ${amt.toFixed(2)}</p></div>`;
+                        let html = `<h2>✅ Cobrança Gerada!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Credor:</strong> ${c.name}</p><p><strong>Método:</strong> ${method.toUpperCase()}</p><p><strong>Valor:</strong> ${cfg.symbol} ${amt.toFixed(2)}</p></div>`;
 
-                    if (method === 'pix') {
-                        if (data.pixPayload) html += `<div class="invoice-box"><h3>📱 Código PIX</h3>${data.pixCode ? `<div class="pix-qr"><img src="data:image/png;base64,${data.pixCode}" alt="QR Code"></div>` : ''}<div class="invoice-code">${data.pixPayload}</div><button class="copy-btn" onclick="copiarLink('${data.pixPayload}')">📋 Copiar Código PIX</button></div>`;
-                        else if (pixKey) html += `<div class="invoice-box"><h3> Chave PIX</h3><div class="invoice-code">${pixKey}</div><button class="copy-btn" onclick="copiarLink('${pixKey}')">📋 Copiar Chave</button></div>`;
-                        else html += `<div class="alert-warning">⚠️ Chave PIX não configurada! Vá em Configurações.</div>`;
+                        if (method === 'pix') {
+                            if (data.pixPayload) html += `<div class="invoice-box"><h3>📱 Código PIX</h3>${data.pixCode ? `<div class="pix-qr"><img src="data:image/png;base64,${data.pixCode}" alt="QR Code"></div>` : ''}<div class="invoice-code">${data.pixPayload}</div><button class="copy-btn" onclick="copiarLink('${data.pixPayload}')">📋 Copiar Código PIX</button></div>`;
+                            else if (pixKey) html += `<div class="invoice-box"><h3> Chave PIX</h3><div class="invoice-code">${pixKey}</div><button class="copy-btn" onclick="copiarLink('${pixKey}')">📋 Copiar Chave</button></div>`;
+                            else html += `<div class="alert-warning">⚠️ Chave PIX não configurada! Vá em Configurações.</div>`;
+                        }
+
+                        if (method === 'boleto') {
+                            const bView = data.boletoViewUrl || data.paymentLink || `https://www.asaas.com/c/${data.paymentId}`;
+                            html += `<div class="invoice-box"><h3>📄 Boleto Bancário</h3><p><strong>Número:</strong> ${data.boletoNumber || 'N/A'}</p><button class="btn btn-pay" onclick="window.open('${bView}', '_blank')">👁️ Visualizar Boleto</button></div>`;
+                        }
+
+                        if (method === 'credit_card' || method === 'cartao') {
+                            const cartaoLink = data.paymentLink || `https://www.asaas.com/c/${data.paymentId}`;
+                            html += `<div class="invoice-box"><h3>💳 Pagamento com Cartão</h3><div class="invoice-code">${cartaoLink}</div><button class="copy-btn" onclick="copiarLink('${cartaoLink}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${cartaoLink}', '_blank')">💳 Pagar com Cartão</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${cartaoLink}', '${cfg.symbol} ${amt.toFixed(2)}')">📱 WhatsApp</button></div>`;
+                        }
+
+                        html += `<div class="success-msg">✅ Cobrança registrada!</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
+                        document.getElementById('conteudoCobranca').innerHTML = html;
+                    } else {
+                        // USD ou EUR - usa Stripe
+                        const resp = await fetch(`${WORKER_URL}/create-stripe-checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, currency: currency, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code }) });
+                        const data = await resp.json();
+                        if (!resp.ok) throw new Error(data.error || 'Erro ao gerar checkout Stripe');
+
+                        await supabaseClient.from('invoices').update({ stripe_session_id: data.sessionId, invoice_url: data.url }).eq('invoice_code', code);
+
+                        const html = `<h2>✅ Link de Pagamento Internacional Gerado!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Valor:</strong> ${cfg.symbol} ${amt.toFixed(2)} ${currency}</p><p><strong>Gateway:</strong> ${cfg.gateway}</p></div><div class="invoice-box" style="background:#f0fdf4; border-color:#10b981;"><h3> Link Seguro de Pagamento</h3><div class="invoice-code">${data.url}</div><button class="copy-btn" onclick="copiarLink('${data.url}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${data.url}', '_blank')"> Abrir Página de Pagamento</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${data.url}', '${cfg.symbol} ${amt.toFixed(2)} ${currency}')">📱 Enviar por WhatsApp</button></div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
+                        document.getElementById('conteudoCobranca').innerHTML = html;
                     }
-
-                    if (method === 'boleto') {
-                        const bView = data.boletoViewUrl || data.boletoLink || `https://www.asaas.com/c/${data.paymentId}`;
-                        const bPdf = data.boletoPdfUrl || bView;
-                        const bNum = data.boletoNumber || 'N/A';
-                        html += `<div class="invoice-box"><h3>📄 Boleto Bancário</h3><p><strong>Número:</strong> ${bNum}</p><p><strong>Link para Visualizar:</strong></p><div class="invoice-code">${bView}</div><button class="copy-btn" onclick="copiarLink('${bView}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${bView}', '_blank')">👁️ Visualizar Boleto</button><button class="btn btn-asaas" onclick="window.open('${bPdf}', '_blank')"> Baixar PDF</button></div>`;
-                    }
-
-                    if (method === 'cartao' || method === 'credit_card') {
-                        const cartaoLink = data.paymentLink || data.checkoutUrl || `https://www.asaas.com/c/${data.paymentId}`;
-                        html += `<div class="invoice-box"><h3>💳 Pagamento com Cartão</h3><p><strong>Link de Pagamento:</strong></p><div class="invoice-code">${cartaoLink}</div><button class="copy-btn" onclick="copiarLink('${cartaoLink}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${cartaoLink}', '_blank')">💳 Pagar com Cartão</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${cartaoLink}', '${cfg.symbol} ${amt.toFixed(2)}')">📱 WhatsApp</button></div>`;
-                    }
-
-                    if (method === 'zelle') {
-                        if (zelleEmail) html += `<div class="invoice-box"><h3>🔄 Zelle (Bank of America)</h3><p><strong>Email:</strong></p><div class="invoice-code">${zelleEmail}</div><button class="copy-btn" onclick="copiarLink('${zelleEmail}')">📋 Copiar Email</button><p style="margin-top:10px; font-size:0.9em; color:#718096;">💡 Envie via Zelle</p></div>`;
-                        else html += `<div class="alert-warning">⚠️ Email Zelle não configurado! Vá em Configurações.</div>`;
-                    }
-
-                    html += `<div class="success-msg">✅ Cobrança registrada!</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
-                    document.getElementById('conteudoCobranca').innerHTML = html;
                 } catch (e) { alert('❌ Erro: ' + e.message); }
                 finally { removerLoading(); }
                 carregarCobrancas();
@@ -832,13 +806,12 @@ if ('serviceWorker' in navigator) {
                 const { data: dd } = await supabaseClient.from('debts').select('debtor_id').eq('id', inv.debt_id).single();
                 let dn = '-';
                 if (dd && dd.debtor_id) { const { data: db } = await supabaseClient.from('debtors').select('name').eq('id', dd.debtor_id).single(); dn = db ? db.name : '-'; }
-                const sym = inv.currency === 'USD' ? '$' : 'R$';
+                const sym = inv.currency === 'USD' ? '$' : inv.currency === 'EUR' ? '€' : 'R$';
                 const sc = inv.status === 'paid' ? 'badge-paid' : 'badge-pending';
                 const st = inv.status === 'paid' ? 'Pago' : 'Pendente';
                 const dd2 = inv.due_date ? new Date(inv.due_date).toLocaleDateString('pt-BR') : '-';
-                const mt = inv.payment_method === 'pix' ? 'PIX' : inv.payment_method === 'boleto' ? 'Boleto' : inv.payment_method === 'zelle' ? 'Zelle' : `Cartão ${inv.installments}x`;
-                const bk = inv.currency === 'USD' ? 'Stripe' : 'Asaas';
-                t.innerHTML += `<tr><td><strong>${inv.invoice_code}</strong></td><td>${dn}</td><td><strong>${sym} ${parseFloat(inv.total_amount || inv.amount).toFixed(2)}</strong><br><small>${mt}<br>${bk}</small></td><td>${dd2}</td><td><span class="badge ${sc}">${st}</span></td><td class="action-buttons">${inv.invoice_url ? `<button class="btn btn-stripe btn-small" onclick="window.open('${inv.invoice_url}', '_blank')"> Pagar</button>` : ''}<button class="btn btn-small" onclick="verCobranca('${inv.id}')">👁️ Ver</button><button class="btn btn-edit btn-small" onclick="editarCobranca('${inv.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirCobranca('${inv.id}')">🗑️ Excluir</button>${inv.invoice_url ? `<button class="btn btn-edit btn-small" onclick="copiarLink('${inv.invoice_url}')">📋 Link</button>` : ''}</td></tr>`;
+                const mt = inv.payment_method === 'pix' ? 'PIX' : inv.payment_method === 'boleto' ? 'Boleto' : `Cartão ${inv.installments}x`;
+                t.innerHTML += `<tr><td><strong>${inv.invoice_code}</strong></td><td>${dn}</td><td><strong>${sym} ${parseFloat(inv.total_amount || inv.amount).toFixed(2)}</strong><br><small>${mt}</small></td><td>${dd2}</td><td><span class="badge ${sc}">${st}</span></td><td class="action-buttons">${inv.invoice_url ? `<button class="btn btn-stripe btn-small" onclick="window.open('${inv.invoice_url}', '_blank')">🔗 Pagar</button>` : ''}<button class="btn btn-small" onclick="verCobranca('${inv.id}')">👁️ Ver</button><button class="btn btn-edit btn-small" onclick="editarCobranca('${inv.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirCobranca('${inv.id}')">🗑️ Excluir</button>${inv.invoice_url ? `<button class="btn btn-edit btn-small" onclick="copiarLink('${inv.invoice_url}')"> Link</button>` : ''}</td></tr>`;
             }
         }
 
@@ -865,10 +838,9 @@ if ('serviceWorker' in navigator) {
             const { data: dd } = await supabaseClient.from('debts').select('debtor_id').eq('id', inv.debt_id).single();
             let dn = '-';
             if (dd && dd.debtor_id) { const { data: db } = await supabaseClient.from('debtors').select('name').eq('id', dd.debtor_id).single(); dn = db ? db.name : '-'; }
-            const sym = inv.currency === 'USD' ? '$' : 'R$';
-            const mt = inv.payment_method === 'pix' ? 'PIX' : inv.payment_method === 'boleto' ? 'Boleto' : inv.payment_method === 'zelle' ? 'Zelle' : `Cartão ${inv.installments}x`;
-            const bk = inv.currency === 'USD' ? 'Bank of America (Stripe)' : 'Banco Inter (Asaas)';
-            const html = `<h2>💳 Detalhes da Cobrança</h2><div class="invoice-box"><p><strong>Código:</strong> ${inv.invoice_code}</p><p><strong>Devedor:</strong> ${dn}</p><p><strong>Banco:</strong> ${bk}</p><p><strong>Método:</strong> ${mt}</p><p><strong>Valor:</strong> ${sym} ${parseFloat(inv.amount).toFixed(2)}</p>${inv.installments > 1 ? `<p><strong>Parcelas:</strong> ${inv.installments}x de ${sym} ${parseFloat(inv.installment_value).toFixed(2)}</p>` : ''}<p><strong>Total:</strong> ${sym} ${parseFloat(inv.total_amount || inv.amount).toFixed(2)}</p><p><strong>Vencimento:</strong> ${inv.due_date ? new Date(inv.due_date).toLocaleDateString('pt-BR') : '-'}</p><p><strong>Status:</strong> ${inv.status === 'paid' ? '✅ Pago' : '⏳ Pendente'}</p>${inv.invoice_url ? `<p><strong>Link:</strong> <a href="${inv.invoice_url}" target="_blank">${inv.invoice_url}</a></p>` : ''}</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
+            const sym = inv.currency === 'USD' ? '$' : inv.currency === 'EUR' ? '€' : 'R$';
+            const mt = inv.payment_method === 'pix' ? 'PIX' : inv.payment_method === 'boleto' ? 'Boleto' : `Cartão ${inv.installments}x`;
+            const html = `<h2>💳 Detalhes da Cobrança</h2><div class="invoice-box"><p><strong>Código:</strong> ${inv.invoice_code}</p><p><strong>Devedor:</strong> ${dn}</p><p><strong>Banco:</strong> ${inv.bank_account || '-'}</p><p><strong>Método:</strong> ${mt}</p><p><strong>Valor:</strong> ${sym} ${parseFloat(inv.amount).toFixed(2)}</p>${inv.installments > 1 ? `<p><strong>Parcelas:</strong> ${inv.installments}x de ${sym} ${parseFloat(inv.installment_value).toFixed(2)}</p>` : ''}<p><strong>Total:</strong> ${sym} ${parseFloat(inv.total_amount || inv.amount).toFixed(2)}</p><p><strong>Vencimento:</strong> ${inv.due_date ? new Date(inv.due_date).toLocaleDateString('pt-BR') : '-'}</p><p><strong>Status:</strong> ${inv.status === 'paid' ? '✅ Pago' : '⏳ Pendente'}</p>${inv.invoice_url ? `<p><strong>Link:</strong> <a href="${inv.invoice_url}" target="_blank">${inv.invoice_url}</a></p>` : ''}</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
             document.getElementById('conteudoCobranca').innerHTML = html;
             abrirModal();
         }

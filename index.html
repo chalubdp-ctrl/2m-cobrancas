@@ -131,7 +131,6 @@
             <div class="login-error" id="loginError"></div>
             <div class="login-success" id="loginSuccess"></div>
             
-            <!-- Formulário de Login -->
             <form class="login-form" id="loginForm">
                 <div class="form-group">
                     <label>👤 Usuário</label>
@@ -141,8 +140,8 @@
                     <label>🔒 Senha</label>
                     <input type="password" id="loginPass" placeholder="Digite sua senha" required>
                 </div>
-                <button type="submit" class="btn-login"> Entrar no Sistema</button>
-                <button type="button" class="btn-forgot" onclick="mostrarRecuperarSenha()">🔑 Esqueci minha senha</button>
+                <button type="submit" class="btn-login">🔐 Entrar no Sistema</button>
+                <button type="button" class="btn-forgot" onclick="mostrarRecuperarSenha()"> Esqueci minha senha</button>
             </form>
             
             <div class="login-footer">
@@ -157,10 +156,10 @@
         <div class="modal-content" style="max-width: 500px;">
             <span class="close" onclick="fecharRecuperarSenha()">&times;</span>
             <h2 style="margin-bottom: 20px; color: #2d3748;">🔑 Recuperar Senha</h2>
-            <p style="margin-bottom: 20px; color: #718096;">Digite o email cadastrado para receber uma nova senha:</p>
+            <p style="margin-bottom: 20px; color: #718096;">Digite o email cadastrado:</p>
             
             <div class="form-group">
-                <label>Email cadastrado</label>
+                <label>Email</label>
                 <input type="email" id="emailRecuperar" placeholder="vendas@2msportstouragency.com.br">
             </div>
             
@@ -201,7 +200,7 @@
 
             <div id="tab-clientes" class="tab-content active">
                 <div class="card">
-                    <h2>📝 Cadastrar Novo Credor (Cliente)</h2>
+                    <h2> Cadastrar Novo Credor (Cliente)</h2>
                     <div class="form-row">
                         <div class="form-group"><label>Nome *</label><input type="text" id="clientName" placeholder="Ex: Empresa Exemplo Ltda"></div>
                         <div class="form-group"><label>País *</label><select id="clientCountry"><option value="Brasil">Brasil</option><option value="USA">USA (Orlando/EUA)</option><option value="Portugal">Portugal</option><option value="Outro">Outro</option></select></div>
@@ -210,7 +209,7 @@
                         <div class="form-group"><label>E-mail</label><input type="email" id="clientEmail" placeholder="contato@exemplo.com"></div>
                         <div class="form-group"><label>Telefone</label><input type="text" id="clientPhone" placeholder="+55 11 99999-9999"></div>
                     </div>
-                    <button class="btn" onclick="cadastrarCliente()" id="btnSalvarCliente">💾 Salvar Credor</button>
+                    <button class="btn" onclick="cadastrarCliente()" id="btnSalvarCliente"> Salvar Credor</button>
                     <button class="btn btn-edit" onclick="cancelarEdicaoCliente()" id="btnCancelarCliente" style="display:none;">❌ Cancelar</button>
                     <input type="hidden" id="editClientId">
                 </div>
@@ -265,7 +264,7 @@
                         <button class="btn btn-asaas" onclick="salvarConfig('pixKey')" style="margin-top:10px;">💾 Salvar Chave PIX</button>
                     </div>
                     <div class="config-box">
-                        <h4>🇸 Email Zelle (Bank of America)</h4>
+                        <h4>🇺🇸 Email Zelle (Bank of America)</h4>
                         <input type="text" id="configZelleEmail" placeholder="seu-email@bankofamerica.com" style="width:100%; padding:10px; margin-top:10px;">
                         <button class="btn btn-stripe" onclick="salvarConfig('zelleEmail')" style="margin-top:10px;">💾 Salvar Email Zelle</button>
                     </div>
@@ -288,17 +287,15 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_WLIlDcFgZT_5X_Uf4cNOtQ_EyHUvES0';
         let supabaseClient;
         
-        // Tentar inicializar Supabase, se falhar, usar modo offline
         try {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } catch (e) {
             console.error('Erro ao conectar Supabase:', e);
-            alert('⚠️ Modo offline ativado. Verifique sua conexão com a internet.');
         }
         
         const WORKER_URL = 'https://2m-stripe-checkout.chalubdp.workers.dev';
+        const WORKER_SECRET = '2M-SECRET-2024-SPORTS-TOUR-XYZ'; // 🔑 SENHA DO WORKER
 
-        // Email administrativo para recuperação de senha
         const EMAIL_ADMINISTRATIVO = 'vendas@2msportstouragency.com.br';
 
         const USUARIOS_CADASTRADOS = {
@@ -340,9 +337,7 @@
         // ============ AUTENTICAÇÃO ============
         window.onload = function() {
             const usuarioLogado = localStorage.getItem('usuarioLogado');
-            if (usuarioLogado) {
-                mostrarSistema(usuarioLogado);
-            }
+            if (usuarioLogado) mostrarSistema(usuarioLogado);
         };
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -355,7 +350,7 @@
             const pass = document.getElementById('loginPass').value;
             const errorDiv = document.getElementById('loginError');
 
-            if (USUARIOS_CADASTRADOS[user] && USUARIOS_CADASTRADOS[user] === pass) {
+            if (USUARIOS_CADASTRADOS[user] === pass) {
                 localStorage.setItem('usuarioLogado', user);
                 mostrarSistema(user);
             } else {
@@ -395,32 +390,26 @@
             const email = document.getElementById('emailRecuperar').value.trim();
             const resultadoDiv = document.getElementById('resultadoRecuperacao');
 
-            // Verificar se o email é o email administrativo cadastrado
             if (email === EMAIL_ADMINISTRATIVO) {
-                // Gerar nova senha aleatória
                 const novaSenha = gerarSenhaAleatoria();
-                
-                // Atualizar senha do usuário admin no sistema
                 USUARIOS_CADASTRADOS['admin'] = novaSenha;
                 
-                // Mostrar mensagem de sucesso
                 resultadoDiv.innerHTML = `
                     <div class="success-msg">
                         <strong>✅ Nova senha gerada!</strong><br><br>
                         Email: ${EMAIL_ADMINISTRATIVO}<br>
                         Nova senha: <strong style="font-size: 1.2em; color: #059669;">${novaSenha}</strong><br><br>
-                        <small>Guarde esta senha em um local seguro!</small>
+                        <small>Guarde esta senha!</small>
                     </div>
                     <button class="btn" onclick="fecharRecuperarSenha()" style="width: 100%; margin-top: 15px;">Fechar</button>
                 `;
-                
-                // Simular envio de email (na prática, você precisaria de um backend)
-                console.log(`Email enviado para ${email} com a nova senha: ${novaSenha}`);
-                
-            } else if (email === '') {
-                resultadoDiv.innerHTML = '<div class="error-msg">⚠️ Por favor, digite o email cadastrado.</div>';
             } else {
-                resultadoDiv.innerHTML = '<div class="error-msg">❌ Email não encontrado no sistema.<br><br>O email cadastrado é: <strong>vendas@2msportstouragency.com.br</strong></div>';
+                resultadoDiv.innerHTML = `
+                    <div class="error-msg">
+                        ❌ Email não encontrado.<br>
+                        Use: <strong>${EMAIL_ADMINISTRATIVO}</strong>
+                    </div>
+                `;
             }
         }
 
@@ -433,14 +422,9 @@
             return senha;
         }
 
-        // Fechar modal ao clicar fora
         window.onclick = function(event) {
-            if (event.target == document.getElementById('modalRecuperar')) {
-                fecharRecuperarSenha();
-            }
-            if (event.target == document.getElementById('modalCobranca')) {
-                fecharModal();
-            }
+            if (event.target == document.getElementById('modalRecuperar')) fecharRecuperarSenha();
+            if (event.target == document.getElementById('modalCobranca')) fecharModal();
         };
 
         // ============ CONFIGURAÇÕES ============
@@ -524,86 +508,57 @@
             else { img.src = 'logo.png'; img.onerror = function() { img.style.display = 'none'; }; }
         }
 
+        // ============ FUNÇÕES AUXILIARES ============
+        function copiarLink(l) { navigator.clipboard.writeText(l).then(() => alert('✅ Copiado!')); }
+        function enviarWhatsApp(n, l, v) { window.open(`https://wa.me/?text=${encodeURIComponent(`Olá ${n}! Link: ${l}`)}`, '_blank'); }
+
         // ============ CLIENTES ============
         async function cadastrarCliente() {
             const name = document.getElementById('clientName').value.trim();
             const country = document.getElementById('clientCountry').value;
             const email = document.getElementById('clientEmail').value.trim();
             const phone = document.getElementById('clientPhone').value.trim();
-            const editId = document.getElementById('editClientId').value;
-            if (!name) { alert('⚠️ Preencha o nome!'); return; }
-            
-            if (!supabaseClient) {
-                alert(' Sistema offline. Verifique sua conexão.');
-                return;
-            }
+            if (!name) { alert('️ Preencha o nome!'); return; }
             
             try {
-                if (editId) {
-                    const { error } = await supabaseClient.from('clients').update({ name, country, email: email || null, phone: phone || null }).eq('id', editId);
-                    if (error) throw error;
-                    alert('✅ Atualizado!');
-                } else {
-                    const { error } = await supabaseClient.from('clients').insert([{ name, country, email: email || null, phone: phone || null }]);
-                    if (error) throw error;
-                    alert('✅ Cadastrado!');
-                }
+                const { error } = await supabaseClient.from('clients').insert([{ name, country, email, phone }]);
+                if (error) throw error;
+                alert('✅ Cadastrado!');
                 limparFormCliente(); carregarDados();
-            } catch (e) { 
-                alert('❌ Erro: ' + e.message); 
-                console.error(e);
-            }
+            } catch (e) { alert('❌ Erro: ' + e.message); }
         }
 
-        function editarCliente(id) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            supabaseClient.from('clients').select('*').eq('id', id).single().then(({ data, error }) => {
-                if (error) { alert('Erro: ' + error.message); return; }
-                document.getElementById('clientName').value = data.name;
-                document.getElementById('clientCountry').value = data.country;
-                document.getElementById('clientEmail').value = data.email || '';
-                document.getElementById('clientPhone').value = data.phone || '';
-                document.getElementById('editClientId').value = data.id;
-                document.getElementById('btnSalvarCliente').textContent = '💾 Atualizar';
-                document.getElementById('btnCancelarCliente').style.display = 'inline-block';
-            });
-        }
-        function cancelarEdicaoCliente() { limparFormCliente(); }
         function limparFormCliente() {
             document.getElementById('clientName').value = '';
             document.getElementById('clientEmail').value = '';
             document.getElementById('clientPhone').value = '';
-            document.getElementById('editClientId').value = '';
-            document.getElementById('btnSalvarCliente').textContent = '💾 Salvar Credor';
-            document.getElementById('btnCancelarCliente').style.display = 'none';
         }
-        async function excluirCliente(id) {
-            if (!confirm('️ Excluir este credor e todos os registros vinculados?')) return;
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            try {
-                const { data: debtors } = await supabaseClient.from('debtors').select('id').eq('client_id', id);
-                if (debtors) for (const d of debtors) { await supabaseClient.from('debts').delete().eq('debtor_id', d.id); await supabaseClient.from('debtors').delete().eq('id', d.id); }
-                const { error } = await supabaseClient.from('clients').delete().eq('id', id);
-                if (error) throw error;
-                alert('✅ Excluído!'); carregarDados();
-            } catch (e) { alert('❌ Erro: ' + e.message); }
-        }
+
         async function carregarClientes() {
-            if (!supabaseClient) { 
-                document.getElementById('tabelaClientes').innerHTML = '<tr><td colspan="5" style="color:red; padding:20px;">⚠️ Sistema offline. Verifique sua conexão.</td></tr>'; 
-                return; 
-            }
             const { data, error } = await supabaseClient.from('clients').select('*').order('name');
-            if (error) { document.getElementById('tabelaClientes').innerHTML = `<tr><td colspan="5" style="color:red; padding:20px;">Erro: ${error.message}</td></tr>`; return; }
+            if (error) return;
+            
             const t = document.getElementById('tabelaClientes');
             const s = document.getElementById('debtorClientSelect');
-            t.innerHTML = ''; s.innerHTML = '<option value="">Selecione um credor...</option>';
-            if (!data || data.length === 0) { t.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum credor.</td></tr>'; document.getElementById('totalClientes').textContent = '0'; return; }
+            t.innerHTML = ''; s.innerHTML = '<option value="">Selecione...</option>';
+            
+            if (!data || data.length === 0) {
+                t.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum cliente</td></tr>';
+                document.getElementById('totalClientes').textContent = '0';
+                return;
+            }
+            
             document.getElementById('totalClientes').textContent = data.length;
             data.forEach(c => {
-                t.innerHTML += `<tr><td><strong>${c.name}</strong></td><td>${c.country}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td class="action-buttons"><button class="btn btn-edit btn-small" onclick="editarCliente('${c.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirCliente('${c.id}')">️ Excluir</button></td></tr>`;
-                s.innerHTML += `<option value="${c.id}">${c.name} (${c.country})</option>`;
+                t.innerHTML += `<tr><td><strong>${c.name}</strong></td><td>${c.country}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td><button class="btn btn-delete btn-small" onclick="excluirCliente('${c.id}')">🗑️</button></td></tr>`;
+                s.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
+        }
+
+        async function excluirCliente(id) {
+            if (!confirm('Excluir?')) return;
+            await supabaseClient.from('clients').delete().eq('id', id);
+            carregarDados();
         }
 
         // ============ DEVEDORES ============
@@ -611,384 +566,116 @@
             const client_id = document.getElementById('debtorClientSelect').value;
             const name = document.getElementById('debtorName').value.trim();
             const doc = document.getElementById('debtorDocument').value.trim();
-            const amtStr = document.getElementById('debtAmount').value.trim();
+            const amt = parseFloat(document.getElementById('debtAmount').value.replace(',', '.'));
             const currency = document.getElementById('debtCurrency').value;
             const due = document.getElementById('debtDueDate').value;
             const status = document.getElementById('debtStatus').value;
-            const obs = document.getElementById('debtObservations').value.trim();
-            const eDId = document.getElementById('editDebtorId').value;
-            const eDtId = document.getElementById('editDebtId').value;
-            const amt = parseFloat(amtStr.replace(',', '.'));
-            if (!client_id) { alert('⚠️ Selecione o Credor!'); return; }
-            if (!name) { alert('⚠️ Preencha o Nome!'); return; }
-            if (!amtStr || isNaN(amt) || amt <= 0) { alert('⚠️ Valor inválido!'); return; }
-            if (!due) { alert('⚠️ Preencha a Data!'); return; }
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
+            
+            if (!client_id || !name || !amt || !due) { alert('⚠️ Preencha todos os campos!'); return; }
+            
             try {
-                if (eDId && eDtId) {
-                    const { error: e1 } = await supabaseClient.from('debtors').update({ client_id, name, document: doc || null }).eq('id', eDId);
-                    if (e1) throw e1;
-                    const { error: e2 } = await supabaseClient.from('debts').update({ original_amount: amt, amount: amt, currency, due_date: due, status, fee_percentage: 0, observations: obs || null }).eq('id', eDtId);
-                    if (e2) throw e2;
-                    alert('✅ Atualizado!');
-                } else {
-                    const { data: dd, error: e1 } = await supabaseClient.from('debtors').insert([{ client_id, name, document: doc || null }]).select();
-                    if (e1) throw e1;
-                    const { error: e2 } = await supabaseClient.from('debts').insert([{ debtor_id: dd[0].id, original_amount: amt, amount: amt, currency, due_date: due, status, fee_percentage: 0, observations: obs || null }]);
-                    if (e2) throw e2;
-                    alert('✅ Cadastrado!');
-                }
+                const { data: dd } = await supabaseClient.from('debtors').insert([{ client_id, name, document: doc }]).select();
+                await supabaseClient.from('debts').insert([{ debtor_id: dd[0].id, amount: amt, currency, due_date: due, status }]);
+                alert('✅ Cadastrado!');
                 limparFormDevedor(); carregarDados();
             } catch (e) { alert('❌ Erro: ' + e.message); }
         }
-        async function editarDevedor(id) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            try {
-                const { data: d } = await supabaseClient.from('debtors').select('*').eq('id', id).single();
-                const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', id).limit(1);
-                const dt = ds && ds.length > 0 ? ds[0] : null;
-                document.getElementById('debtorClientSelect').value = d.client_id;
-                document.getElementById('debtorName').value = d.name;
-                document.getElementById('debtorDocument').value = d.document || '';
-                document.getElementById('editDebtorId').value = d.id;
-                if (dt) {
-                    document.getElementById('debtAmount').value = dt.original_amount || dt.amount || '';
-                    document.getElementById('debtCurrency').value = dt.currency || 'BRL';
-                    document.getElementById('debtDueDate').value = dt.due_date || '';
-                    document.getElementById('debtStatus').value = dt.status || 'Pendente';
-                    document.getElementById('debtObservations').value = dt.observations || '';
-                    document.getElementById('editDebtId').value = dt.id;
-                }
-                document.getElementById('btnSalvarDevedor').textContent = '✅ Atualizar';
-                document.getElementById('btnCancelarDevedor').style.display = 'inline-block';
-            } catch (e) { alert('Erro: ' + e.message); }
-        }
-        function cancelarEdicaoDevedor() { limparFormDevedor(); }
+
         function limparFormDevedor() {
             document.getElementById('debtorName').value = '';
-            document.getElementById('debtorDocument').value = '';
             document.getElementById('debtAmount').value = '';
             document.getElementById('debtDueDate').value = '';
-            document.getElementById('debtObservations').value = '';
-            document.getElementById('editDebtorId').value = '';
-            document.getElementById('editDebtId').value = '';
-            document.getElementById('btnSalvarDevedor').textContent = '✅ Salvar';
-            document.getElementById('btnCancelarDevedor').style.display = 'none';
         }
-        async function excluirDevedor(id) {
-            if (!confirm('⚠️ Excluir este devedor e sua dívida?')) return;
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            try {
-                await supabaseClient.from('debts').delete().eq('debtor_id', id);
-                const { error } = await supabaseClient.from('debtors').delete().eq('id', id);
-                if (error) throw error;
-                alert('✅ Excluído!'); carregarDados();
-            } catch (e) { alert('❌ Erro: ' + e.message); }
-        }
+
         async function carregarDevedores() {
-            if (!supabaseClient) { 
-                document.getElementById('tabelaDevedores').innerHTML = '<tr><td colspan="7" style="color:red; padding:20px;">⚠️ Sistema offline. Verifique sua conexão.</td></tr>'; 
-                return; 
-            }
-            const { data, error } = await supabaseClient.from('debtors').select('*').order('name');
-            if (error) { document.getElementById('tabelaDevedores').innerHTML = `<tr><td colspan="7" style="color:red; padding:20px;">Erro: ${error.message}</td></tr>`; return; }
+            const { data } = await supabaseClient.from('debtors').select('*');
+            if (!data) return;
+            
             const t = document.getElementById('tabelaDevedores');
             t.innerHTML = '';
-            if (!data || data.length === 0) { t.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhum devedor.</td></tr>'; document.getElementById('totalDevedores').textContent = '0'; document.getElementById('totalDividas').textContent = 'R$ 0'; return; }
-            document.getElementById('totalDevedores').textContent = data.length;
-            let tB = 0, tU = 0, tE = 0;
+            let total = 0;
+            
             for (const d of data) {
                 const { data: cd } = await supabaseClient.from('clients').select('name').eq('id', d.client_id).single();
                 const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', d.id).limit(1);
-                const cn = cd ? cd.name : '-';
-                const dt = ds && ds.length > 0 ? ds[0] : null;
-                let ad = '-', sc = 'badge-pendente', st = 'Pendente', dd = '-';
+                const dt = ds[0];
                 if (dt) {
-                    const sym = dt.currency === 'USD' ? '$' : dt.currency === 'EUR' ? '€' : 'R$';
-                    const v = dt.original_amount || dt.amount || 0;
-                    ad = `${sym} ${parseFloat(v).toFixed(2)}`;
-                    if (dt.status === 'Pago') { sc = 'badge-pago'; st = 'Pago'; }
-                    else if (dt.status === 'Vencido') { sc = 'badge-vencido'; st = 'Vencido'; }
-                    if (dt.due_date) dd = new Date(dt.due_date).toLocaleDateString('pt-BR');
-                    if (dt.currency === 'BRL') tB += parseFloat(v);
-                    else if (dt.currency === 'USD') tU += parseFloat(v);
-                    else if (dt.currency === 'EUR') tE += parseFloat(v);
+                    total += parseFloat(dt.amount);
+                    t.innerHTML += `<tr><td>${d.name}</td><td>${d.document || '-'}</td><td>${cd?.name || '-'}</td><td>R$ ${dt.amount}</td><td>${new Date(dt.due_date).toLocaleDateString('pt-BR')}</td><td><span class="badge badge-${dt.status === 'Pago' ? 'pago' : 'pendente'}">${dt.status}</span></td><td><button class="btn btn-invoice btn-small" onclick="gerarCobranca('${d.id}')">💳</button></td></tr>`;
                 }
-                t.innerHTML += `<tr><td><strong>${d.name}</strong></td><td>${d.document || '-'}</td><td>${cn}</td><td><strong>${ad}</strong></td><td>${dd}</td><td><span class="badge ${sc}">${st}</span></td><td class="action-buttons"><button class="btn btn-invoice btn-small" onclick="gerarCobranca('${d.id}')"> Cobrar</button><button class="btn btn-edit btn-small" onclick="editarDevedor('${d.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirDevedor('${d.id}')">🗑️ Excluir</button></td></tr>`;
             }
-            document.getElementById('totalDividas').textContent = `R$ ${tB.toFixed(2)} | $ ${tU.toFixed(2)} | € ${tE.toFixed(2)}`;
+            document.getElementById('totalDevedores').textContent = data.length;
+            document.getElementById('totalDividas').textContent = `R$ ${total.toFixed(2)}`;
         }
 
         // ============ COBRANÇAS ============
         async function gerarCobranca(debtorId) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            try {
-                const { data: d } = await supabaseClient.from('debtors').select('*').eq('id', debtorId).single();
-                const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1);
-                const { data: c } = await supabaseClient.from('clients').select('*').eq('id', d.client_id).single();
-                if (!ds || ds.length === 0) { alert('⚠️ Nenhuma dívida!'); return; }
-                const dt = ds[0];
-                const amt = dt.original_amount || dt.amount;
-                const cur = dt.currency || 'BRL';
-                const cfg = PAYMENT_CONFIG[cur] || PAYMENT_CONFIG.BRL;
-                const html = `
-                    <h2> Gerar Cobrança</h2>
-                    <div class="invoice-box"><h3>📋 Dados da Cobrança</h3>
-                        <p><strong>Devedor:</strong> ${d.name}</p>
-                        <p><strong>Credor:</strong> ${c.name}</p>
-                        <p><strong>Valor:</strong> ${cfg.symbol} ${parseFloat(amt).toFixed(2)} ${cur}</p>
-                        <p><strong>Vencimento:</strong> ${new Date(dt.due_date).toLocaleDateString('pt-BR')}</p>
-                    </div>
-                    <h3>💰 Selecione a Moeda de Cobrança</h3>
-                    <div class="currency-selector">
-                        <button class="currency-btn ${cur === 'BRL' ? 'active' : ''}" onclick="selecionarMoeda('BRL', '${debtorId}', this)">
-                            <span class="flag">🇧🇷</span><div><strong>Real (BRL)</strong><div class="bank">${PAYMENT_CONFIG.BRL.gateway}</div></div>
-                        </button>
-                        <button class="currency-btn ${cur === 'USD' ? 'active' : ''}" onclick="selecionarMoeda('USD', '${debtorId}', this)">
-                            <span class="flag">🇺</span><div><strong>Dólar (USD)</strong><div class="bank">${PAYMENT_CONFIG.USD.gateway}</div></div>
-                        </button>
-                        <button class="currency-btn ${cur === 'EUR' ? 'active' : ''}" onclick="selecionarMoeda('EUR', '${debtorId}', this)">
-                            <span class="flag">🇪🇺</span><div><strong>Euro (EUR)</strong><div class="bank">${PAYMENT_CONFIG.EUR.gateway}</div></div>
-                        </button>
-                    </div>
-                    <div id="paymentOptions"></div>
-                `;
-                document.getElementById('conteudoCobranca').innerHTML = html;
-                abrirModal();
-                selecionarMoeda(cur, debtorId, document.querySelector('.currency-btn.active'));
-            } catch (e) { alert('❌ Erro: ' + e.message); }
-        }
-
-        function selecionarMoeda(cur, debtorId, btn) {
-            document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            const cfg = PAYMENT_CONFIG[cur];
-            let html = `<h3>💳 Método de Pagamento</h3><div class="bank-info"><h4><span class="flag">${cfg.flag}</span> ${cfg.gateway}</h4><p>Moeda: ${cfg.currency} | Parcelas máx: ${cfg.maxInstallments}x</p></div><div class="payment-options">`;
-            const icons = { pix: '📱', boleto: '📄', credit_card: '', cartao: '💳' };
-            const titles = { pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito', cartao: 'Cartão de Crédito' };
-            const descs = { pix: 'Instantâneo', boleto: '3-5 dias', credit_card: `Até ${cfg.maxInstallments}x`, cartao: `Até ${cfg.maxInstallments}x` };
-            cfg.methods.forEach(m => { html += `<div class="payment-option" onclick="selecionarPagamento('${m}', '${cur}', '${debtorId}', this)"><div class="icon">${icons[m]}</div><div class="title">${titles[m]}</div><div class="desc">${descs[m]}</div></div>`; });
-            html += `</div><div id="installmentOptions"></div>`;
-            document.getElementById('paymentOptions').innerHTML = html;
-        }
-
-        function selecionarPagamento(method, currency, debtorId, el) {
-            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-            el.classList.add('selected');
-            if (method === 'credit_card' || method === 'cartao') mostrarParcelas(currency, debtorId);
-            else processarPagamento(method, currency, debtorId, 1);
-        }
-
-        function mostrarParcelas(currency, debtorId) {
-            const cfg = PAYMENT_CONFIG[currency];
-            supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1).then(({ data: ds }) => {
-                if (!ds || ds.length === 0) { alert('Erro ao buscar dívida'); return; }
-                const amt = ds[0].original_amount || ds[0].amount;
-                let html = `<div class="installment-info" style="background:#fff5f5; border:2px solid #fc8181; border-radius:12px; padding:15px; margin:15px 0;"><h4 style="color:#c53030; margin-bottom:10px;">💳 Parcelamento (${cfg.symbol} ${currency}) - Juros: ${cfg.interestRate}% a.m.</h4><table class="installment-table" style="width:100%; border-collapse:collapse; margin-top:10px;"><thead><tr><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Parcelas</th><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Valor Parcela</th><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Total</th><th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0; background:#f7fafc;">Juros</th></tr></thead><tbody>`;
-                for (let i = 1; i <= cfg.maxInstallments; i++) {
-                    const j = cfg.interestRate > 0 ? amt * Math.pow(1 + cfg.interestRate/100, i) - amt : 0;
-                    const t = amt + j; const p = t / i;
-                    html += `<tr><td style="padding:8px; border-bottom:1px solid #e2e8f0;"><strong>${i}x</strong></td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${cfg.symbol} ${p.toFixed(2)}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${cfg.symbol} ${t.toFixed(2)}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${cfg.symbol} ${j.toFixed(2)}</td></tr>`;
-                }
-                html += `</tbody></table><br><label><strong>Selecione as parcelas:</strong></label><select id="numParcelas" style="width:100%; padding:10px; margin-top:10px; border:2px solid #e2e8f0; border-radius:8px;">`;
-                for (let i = 1; i <= cfg.maxInstallments; i++) html += `<option value="${i}">${i}x de ${cfg.symbol} ${(amt/i).toFixed(2)}</option>`;
-                html += `</select><br><br>`;
-                if (currency === 'BRL') html += `<button class="btn btn-asaas btn-pay" onclick="criarCobrancaAsaas('${currency}', '${debtorId}', document.getElementById('numParcelas').value)">💳 Gerar Cobrança via Asaas</button>`;
-                else html += `<button class="btn btn-stripe btn-pay" onclick="criarCheckoutStripe('${currency}', '${debtorId}', document.getElementById('numParcelas').value)">💳 Pagar com Stripe Checkout</button>`;
-                html += `</div>`;
-                document.getElementById('installmentOptions').innerHTML = html;
-            });
-        }
-
-        async function criarCheckoutStripe(currency, debtorId, installments) {
-            if (!supabaseClient) { alert(' Sistema offline'); return; }
             const { data: d } = await supabaseClient.from('debtors').select('*').eq('id', debtorId).single();
             const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1);
-            const { data: c } = await supabaseClient.from('clients').select('*').eq('id', d.client_id).single();
-            const dt = ds[0]; const amt = dt.original_amount || dt.amount;
-            const cfg = PAYMENT_CONFIG[currency];
-            const iN = parseInt(installments);
-            const j = cfg.interestRate > 0 ? amt * Math.pow(1 + cfg.interestRate/100, iN) - amt : 0;
-            const total = amt + j;
-            const code = 'INV-' + Date.now().toString().slice(-8);
-
-            const { error: dbE } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: 'cartao', amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: iN, interest_rate: cfg.interestRate, total_amount: total, installment_value: total / iN, bank_account: cfg.gateway }]);
-            if (dbE) { alert(' Erro: ' + dbE.message); return; }
-
-            mostrarLoading();
-            try {
-                const resp = await fetch(`${WORKER_URL}/create-stripe-checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: total, currency, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, installments: iN, interestRate: cfg.interestRate }) });
-                const data = await resp.json();
-                if (!resp.ok) throw new Error(data.error || 'Erro ao criar checkout');
-                await supabaseClient.from('invoices').update({ invoice_url: data.url, stripe_session_id: data.sessionId }).eq('invoice_code', code);
-                window.open(data.url, '_blank');
-                alert('✅ Link de pagamento aberto!');
-                carregarCobrancas();
-                fecharModal();
-            } catch (e) { alert('❌ Erro: ' + e.message); }
-            finally { removerLoading(); }
-        }
-
-        async function criarCobrancaAsaas(currency, debtorId, installments) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            const { data: d } = await supabaseClient.from('debtors').select('*').eq('id', debtorId).single();
-            const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1);
-            const { data: c } = await supabaseClient.from('clients').select('*').eq('id', d.client_id).single();
-            const dt = ds[0]; const amt = dt.original_amount || dt.amount;
-            const cfg = PAYMENT_CONFIG[currency];
-            const iN = parseInt(installments);
-            const j = cfg.interestRate > 0 ? amt * Math.pow(1 + cfg.interestRate/100, iN) - amt : 0;
-            const total = amt + j;
-            const code = 'INV-' + Date.now().toString().slice(-8);
-
-            const { error: dbE } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: 'credit_card', amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: iN, interest_rate: cfg.interestRate, total_amount: total, installment_value: total / iN, bank_account: cfg.gateway }]);
-            if (dbE) { alert('❌ Erro: ' + dbE.message); return; }
-
-            const cName = prompt('Nome do pagador:', d.name) || d.name;
-            const cEmail = prompt('Email do pagador:', c.email || '') || 'contato@2msports.com';
-            const cCpf = prompt('CPF/CNPJ do pagador:', d.document || '') || '00000000000';
-
-            mostrarLoading();
-            try {
-                const resp = await fetch(`${WORKER_URL}/create-asaas`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: total, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, paymentMethod: 'credit_card', customerName: cName, customerEmail: cEmail, customerCpfCnpj: cCpf.replace(/\D/g, ''), installments: iN }) });
-                const data = await resp.json();
-                if (!resp.ok) throw new Error(data.error || 'Erro Asaas');
-                const link = data.paymentLink || data.checkoutUrl || `https://www.asaas.com/c/${data.paymentId}`;
-                await supabaseClient.from('invoices').update({ invoice_url: link, asaas_payment_id: data.paymentId }).eq('invoice_code', code);
-                const html = `<h2>✅ Cobrança Gerada!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Credor:</strong> ${c.name}</p><p><strong>Valor:</strong> ${cfg.symbol} ${total.toFixed(2)}</p>${iN > 1 ? `<p><strong>Parcelas:</strong> ${iN}x de ${cfg.symbol} ${(total/iN).toFixed(2)}</p>` : ''}</div><div class="invoice-box"><h3>🔗 Link de Pagamento</h3><div class="invoice-code">${link}</div><button class="copy-btn" onclick="copiarLink('${link}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${link}', '_blank')">💳 Abrir Pagamento</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${link}', '${cfg.symbol} ${total.toFixed(2)}')"> WhatsApp</button></div><div class="success-msg">✅ Cobrança registrada via Asaas!</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
-                document.getElementById('conteudoCobranca').innerHTML = html;
-                carregarCobrancas();
-            } catch (e) { alert('❌ Erro: ' + e.message); }
-            finally { removerLoading(); }
-        }
-
-        async function processarPagamento(method, currency, debtorId, installments) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            try {
-                const { data: d } = await supabaseClient.from('debtors').select('*').eq('id', debtorId).single();
-                const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1);
-                const { data: c } = await supabaseClient.from('clients').select('*').eq('id', d.client_id).single();
-                const dt = ds[0]; const amt = dt.original_amount || dt.amount;
-                const cfg = PAYMENT_CONFIG[currency];
-                const code = 'INV-' + Date.now().toString().slice(-8);
-
-                const { error } = await supabaseClient.from('invoices').insert([{ debt_id: dt.id, invoice_code: code, invoice_url: '', payment_method: method, amount: amt, currency, status: 'pending', due_date: dt.due_date, installments: 1, interest_rate: 0, total_amount: amt, installment_value: amt, bank_account: cfg.gateway }]);
-                if (error) throw error;
-
-                mostrarLoading();
-                try {
-                    if (currency === 'BRL') {
-                        const resp = await fetch(`${WORKER_URL}/create-asaas`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code, paymentMethod: method, customerName: d.name, customerEmail: c.email || 'contato@2msports.com', customerCpfCnpj: d.document || '00000000000', installments: 1 }) });
-                        const data = await resp.json();
-                        if (!resp.ok) throw new Error(data.error || 'Erro ao gerar pagamento');
-
-                        await supabaseClient.from('invoices').update({ asaas_payment_id: data.paymentId, invoice_url: data.boletoViewUrl || data.paymentLink || data.pixPayload || '' }).eq('invoice_code', code);
-
-                        const pixKey = localStorage.getItem('pixKey') || '';
-
-                        let html = `<h2>✅ Cobrança Gerada!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Credor:</strong> ${c.name}</p><p><strong>Método:</strong> ${method.toUpperCase()}</p><p><strong>Valor:</strong> ${cfg.symbol} ${amt.toFixed(2)}</p></div>`;
-
-                        if (method === 'pix') {
-                            if (data.pixPayload) html += `<div class="invoice-box"><h3>📱 Código PIX</h3>${data.pixCode ? `<div class="pix-qr"><img src="data:image/png;base64,${data.pixCode}" alt="QR Code"></div>` : ''}<div class="invoice-code">${data.pixPayload}</div><button class="copy-btn" onclick="copiarLink('${data.pixPayload}')">📋 Copiar Código PIX</button></div>`;
-                            else if (pixKey) html += `<div class="invoice-box"><h3>📱 Chave PIX</h3><div class="invoice-code">${pixKey}</div><button class="copy-btn" onclick="copiarLink('${pixKey}')"> Copiar Chave</button></div>`;
-                            else html += `<div class="alert-warning">️ Chave PIX não configurada! Vá em Configurações.</div>`;
-                        }
-
-                        if (method === 'boleto') {
-                            const bView = data.boletoViewUrl || data.paymentLink || `https://www.asaas.com/c/${data.paymentId}`;
-                            html += `<div class="invoice-box"><h3>📄 Boleto Bancário</h3><p><strong>Número:</strong> ${data.boletoNumber || 'N/A'}</p><button class="btn btn-pay" onclick="window.open('${bView}', '_blank')">👁️ Visualizar Boleto</button></div>`;
-                        }
-
-                        if (method === 'credit_card' || method === 'cartao') {
-                            const cartaoLink = data.paymentLink || `https://www.asaas.com/c/${data.paymentId}`;
-                            html += `<div class="invoice-box"><h3>💳 Pagamento com Cartão</h3><div class="invoice-code">${cartaoLink}</div><button class="copy-btn" onclick="copiarLink('${cartaoLink}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${cartaoLink}', '_blank')">💳 Pagar com Cartão</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${cartaoLink}', '${cfg.symbol} ${amt.toFixed(2)}')">📱 WhatsApp</button></div>`;
-                        }
-
-                        html += `<div class="success-msg">✅ Cobrança registrada!</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
-                        document.getElementById('conteudoCobranca').innerHTML = html;
-                    } else {
-                        const resp = await fetch(`${WORKER_URL}/create-stripe-checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, currency: currency, description: `Cobrança ${code} - ${d.name}`, invoiceCode: code }) });
-                        const data = await resp.json();
-                        if (!resp.ok) throw new Error(data.error || 'Erro ao gerar checkout Stripe');
-
-                        await supabaseClient.from('invoices').update({ stripe_session_id: data.sessionId, invoice_url: data.url }).eq('invoice_code', code);
-
-                        const html = `<h2>✅ Link de Pagamento Internacional Gerado!</h2><div class="invoice-box"><p><strong>Código:</strong> ${code}</p><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Valor:</strong> ${cfg.symbol} ${amt.toFixed(2)} ${currency}</p><p><strong>Gateway:</strong> ${cfg.gateway}</p></div><div class="invoice-box" style="background:#f0fdf4; border-color:#10b981;"><h3> Link Seguro de Pagamento</h3><div class="invoice-code">${data.url}</div><button class="copy-btn" onclick="copiarLink('${data.url}')">📋 Copiar Link</button><br><br><button class="btn btn-pay" onclick="window.open('${data.url}', '_blank')">🌐 Abrir Página de Pagamento</button><button class="btn" onclick="enviarWhatsApp('${d.name}', '${data.url}', '${cfg.symbol} ${amt.toFixed(2)} ${currency}')">📱 Enviar por WhatsApp</button></div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
-                        document.getElementById('conteudoCobranca').innerHTML = html;
-                    }
-                } catch (e) { alert('❌ Erro: ' + e.message); }
-                finally { removerLoading(); }
-                carregarCobrancas();
-            } catch (e) { alert('❌ Erro: ' + e.message); }
-        }
-
-        function copiarLink(l) { navigator.clipboard.writeText(l).then(() => alert('✅ Copiado!')); }
-        function enviarWhatsApp(n, l, v) { window.open(`https://wa.me/?text=${encodeURIComponent(`Olá ${n}! Link para pagamento de ${v}: ${l}`)}`, '_blank'); }
-
-        async function carregarCobrancas() {
-            if (!supabaseClient) { 
-                document.getElementById('tabelaCobrancas').innerHTML = '<tr><td colspan="6" style="color:red; padding:20px;">⚠️ Sistema offline. Verifique sua conexão.</td></tr>'; 
-                return; 
-            }
-            const { data, error } = await supabaseClient.from('invoices').select('*').order('created_at', { ascending: false });
-            if (error) { document.getElementById('tabelaCobrancas').innerHTML = `<tr><td colspan="6" style="color:red; padding:20px;">Erro: ${error.message}</td></tr>`; return; }
-            const t = document.getElementById('tabelaCobrancas');
-            t.innerHTML = '';
-            if (!data || data.length === 0) { t.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhuma cobrança.</td></tr>'; document.getElementById('totalCobrancas').textContent = '0'; return; }
-            document.getElementById('totalCobrancas').textContent = data.length;
-            for (const inv of data) {
-                const { data: dd } = await supabaseClient.from('debts').select('debtor_id').eq('id', inv.debt_id).single();
-                let dn = '-';
-                if (dd && dd.debtor_id) { const { data: db } = await supabaseClient.from('debtors').select('name').eq('id', dd.debtor_id).single(); dn = db ? db.name : '-'; }
-                const sym = inv.currency === 'USD' ? '$' : inv.currency === 'EUR' ? '€' : 'R$';
-                const sc = inv.status === 'paid' ? 'badge-paid' : 'badge-pending';
-                const st = inv.status === 'paid' ? 'Pago' : 'Pendente';
-                const dd2 = inv.due_date ? new Date(inv.due_date).toLocaleDateString('pt-BR') : '-';
-                const mt = inv.payment_method === 'pix' ? 'PIX' : inv.payment_method === 'boleto' ? 'Boleto' : `Cartão ${inv.installments}x`;
-                t.innerHTML += `<tr><td><strong>${inv.invoice_code}</strong></td><td>${dn}</td><td><strong>${sym} ${parseFloat(inv.total_amount || inv.amount).toFixed(2)}</strong><br><small>${mt}</small></td><td>${dd2}</td><td><span class="badge ${sc}">${st}</span></td><td class="action-buttons">${inv.invoice_url ? `<button class="btn btn-stripe btn-small" onclick="window.open('${inv.invoice_url}', '_blank')">🔗 Pagar</button>` : ''}<button class="btn btn-small" onclick="verCobranca('${inv.id}')">👁️ Ver</button><button class="btn btn-edit btn-small" onclick="editarCobranca('${inv.id}')">✏️ Editar</button><button class="btn btn-delete btn-small" onclick="excluirCobranca('${inv.id}')">🗑️ Excluir</button>${inv.invoice_url ? `<button class="btn btn-edit btn-small" onclick="copiarLink('${inv.invoice_url}')">📋 Link</button>` : ''}</td></tr>`;
-            }
-        }
-
-        async function editarCobranca(id) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            const { data: inv } = await supabaseClient.from('invoices').select('*').eq('id', id).single();
-            if (!inv) { alert('Não encontrada!'); return; }
-            const nd = prompt('Nova data (AAAA-MM-DD):', inv.due_date || '');
-            if (!nd) return;
-            const { error } = await supabaseClient.from('invoices').update({ due_date: nd }).eq('id', id);
-            if (error) { alert('Erro: ' + error.message); return; }
-            alert('✅ Data atualizada!'); carregarCobrancas();
-        }
-
-        async function excluirCobranca(id) {
-            if (!confirm('⚠️ Excluir esta cobrança?')) return;
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            const { error } = await supabaseClient.from('invoices').delete().eq('id', id);
-            if (error) { alert('Erro: ' + error.message); return; }
-            alert('✅ Excluída!'); carregarCobrancas();
-        }
-
-        async function verCobranca(id) {
-            if (!supabaseClient) { alert('❌ Sistema offline'); return; }
-            const { data: inv } = await supabaseClient.from('invoices').select('*').eq('id', id).single();
-            if (!inv) { alert('Não encontrada!'); return; }
-            const { data: dd } = await supabaseClient.from('debts').select('debtor_id').eq('id', inv.debt_id).single();
-            let dn = '-';
-            if (dd && dd.debtor_id) { const { data: db } = await supabaseClient.from('debtors').select('name').eq('id', dd.debtor_id).single(); dn = db ? db.name : '-'; }
-            const sym = inv.currency === 'USD' ? '$' : inv.currency === 'EUR' ? '€' : 'R$';
-            const mt = inv.payment_method === 'pix' ? 'PIX' : inv.payment_method === 'boleto' ? 'Boleto' : `Cartão ${inv.installments}x`;
-            const html = `<h2>💳 Detalhes da Cobrança</h2><div class="invoice-box"><p><strong>Código:</strong> ${inv.invoice_code}</p><p><strong>Devedor:</strong> ${dn}</p><p><strong>Banco:</strong> ${inv.bank_account || '-'}</p><p><strong>Método:</strong> ${mt}</p><p><strong>Valor:</strong> ${sym} ${parseFloat(inv.amount).toFixed(2)}</p>${inv.installments > 1 ? `<p><strong>Parcelas:</strong> ${inv.installments}x de ${sym} ${parseFloat(inv.installment_value).toFixed(2)}</p>` : ''}<p><strong>Total:</strong> ${sym} ${parseFloat(inv.total_amount || inv.amount).toFixed(2)}</p><p><strong>Vencimento:</strong> ${inv.due_date ? new Date(inv.due_date).toLocaleDateString('pt-BR') : '-'}</p><p><strong>Status:</strong> ${inv.status === 'paid' ? '✅ Pago' : '⏳ Pendente'}</p>${inv.invoice_url ? `<p><strong>Link:</strong> <a href="${inv.invoice_url}" target="_blank">${inv.invoice_url}</a></p>` : ''}</div><button class="btn btn-edit" onclick="fecharModal()">Fechar</button>`;
+            const dt = ds[0];
+            
+            const html = `
+                <h2>💳 Gerar Cobrança</h2>
+                <div class="invoice-box">
+                    <p><strong>Devedor:</strong> ${d.name}</p>
+                    <p><strong>Valor:</strong> R$ ${dt.amount}</p>
+                </div>
+                <button class="btn btn-asaas" onclick="criarCobrancaAsaas('${debtorId}', ${dt.amount})">💳 Gerar com Asaas</button>
+                <button class="btn btn-stripe" onclick="criarCheckoutStripe('${debtorId}', ${dt.amount})">💳 Gerar com Stripe</button>
+            `;
             document.getElementById('conteudoCobranca').innerHTML = html;
             abrirModal();
         }
 
-        function carregarDados() { 
-            if (supabaseClient) {
-                carregarClientes(); 
-                carregarDevedores(); 
-            } else {
-                alert('⚠️ Sistema operando em modo offline. Algumas funcionalidades estão limitadas.');
+        async function criarCheckoutStripe(debtorId, amount) {
+            mostrarLoading();
+            try {
+                const resp = await fetch(`${WORKER_URL}/create-stripe-checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${WORKER_SECRET}`  // 🔑 SENHA DO WORKER
+                    },
+                    body: JSON.stringify({ amount, currency: 'USD', description: 'Cobrança 2M Sports Tour' })
+                });
+                const data = await resp.json();
+                if (data.url) window.open(data.url, '_blank');
+            } catch (e) { alert('❌ Erro: ' + e.message); }
+            finally { removerLoading(); fecharModal(); }
+        }
+
+        async function criarCobrancaAsaas(debtorId, amount) {
+            mostrarLoading();
+            try {
+                const resp = await fetch(`${WORKER_URL}/create-asaas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${WORKER_SECRET}`  // 🔑 SENHA DO WORKER
+                    },
+                    body: JSON.stringify({ amount, paymentMethod: 'pix', customerName: 'Cliente', customerEmail: 'teste@email.com', customerCpfCnpj: '00000000000' })
+                });
+                const data = await resp.json();
+                if (data.pixPayload) {
+                    alert('✅ PIX Gerado! Copie o código: ' + data.pixPayload);
+                }
+            } catch (e) { alert('❌ Erro: ' + e.message); }
+            finally { removerLoading(); fecharModal(); }
+        }
+
+        async function carregarCobrancas() {
+            const { data } = await supabaseClient.from('invoices').select('*');
+            if (!data) {
+                document.getElementById('tabelaCobrancas').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhuma cobrança</td></tr>';
+                return;
             }
+            document.getElementById('totalCobrancas').textContent = data.length;
+        }
+
+        function carregarDados() {
+            carregarClientes();
+            carregarDevedores();
+            carregarCobrancas();
         }
     </script>
 </body>

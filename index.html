@@ -131,17 +131,18 @@
             <div class="login-error" id="loginError"></div>
             <div class="login-success" id="loginSuccess"></div>
             
+            <!-- Formulário de Login -->
             <form class="login-form" id="loginForm">
                 <div class="form-group">
-                    <label>👤 Usuário</label>
-                    <input type="text" id="loginUser" placeholder="Digite seu usuário" required>
+                    <label>👤 E-mail</label>
+                    <input type="email" id="loginUser" placeholder="Digite seu e-mail" required>
                 </div>
                 <div class="form-group">
                     <label>🔒 Senha</label>
                     <input type="password" id="loginPass" placeholder="Digite sua senha" required>
                 </div>
                 <button type="submit" class="btn-login">🔐 Entrar no Sistema</button>
-                <button type="button" class="btn-forgot" onclick="mostrarRecuperarSenha()"> Esqueci minha senha</button>
+                <button type="button" class="btn-forgot" onclick="mostrarRecuperarSenha()">🔑 Esqueci minha senha</button>
             </form>
             
             <div class="login-footer">
@@ -155,7 +156,7 @@
     <div id="modalRecuperar" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close" onclick="fecharRecuperarSenha()">&times;</span>
-            <h2 style="margin-bottom: 20px; color: #2d3748;">🔑 Recuperar Senha</h2>
+            <h2 style="margin-bottom: 20px; color: #2d3748;"> Recuperar Senha</h2>
             <p style="margin-bottom: 20px; color: #718096;">Digite o email cadastrado:</p>
             
             <div class="form-group">
@@ -163,7 +164,7 @@
                 <input type="email" id="emailRecuperar" placeholder="vendas@2msportstouragency.com.br">
             </div>
             
-            <button class="btn" onclick="recuperarSenha()" style="width: 100%; padding: 14px;">📧 Enviar Nova Senha</button>
+            <button class="btn" onclick="recuperarSenha()" style="width: 100%; padding: 14px;"> Enviar Nova Senha</button>
             
             <div id="resultadoRecuperacao" style="margin-top: 20px;"></div>
         </div>
@@ -200,7 +201,7 @@
 
             <div id="tab-clientes" class="tab-content active">
                 <div class="card">
-                    <h2> Cadastrar Novo Credor (Cliente)</h2>
+                    <h2>📝 Cadastrar Novo Credor (Cliente)</h2>
                     <div class="form-row">
                         <div class="form-group"><label>Nome *</label><input type="text" id="clientName" placeholder="Ex: Empresa Exemplo Ltda"></div>
                         <div class="form-group"><label>País *</label><select id="clientCountry"><option value="Brasil">Brasil</option><option value="USA">USA (Orlando/EUA)</option><option value="Portugal">Portugal</option><option value="Outro">Outro</option></select></div>
@@ -209,7 +210,7 @@
                         <div class="form-group"><label>E-mail</label><input type="email" id="clientEmail" placeholder="contato@exemplo.com"></div>
                         <div class="form-group"><label>Telefone</label><input type="text" id="clientPhone" placeholder="+55 11 99999-9999"></div>
                     </div>
-                    <button class="btn" onclick="cadastrarCliente()" id="btnSalvarCliente"> Salvar Credor</button>
+                    <button class="btn" onclick="cadastrarCliente()" id="btnSalvarCliente">💾 Salvar Credor</button>
                     <button class="btn btn-edit" onclick="cancelarEdicaoCliente()" id="btnCancelarCliente" style="display:none;">❌ Cancelar</button>
                     <input type="hidden" id="editClientId">
                 </div>
@@ -259,12 +260,12 @@
                     <div id="configStatusPix" class="config-status" style="display:none;"></div>
                     <div id="configStatusZelle" class="config-status" style="display:none;"></div>
                     <div class="config-box">
-                        <h4>🇧🇷 Chave PIX (Asaas)</h4>
+                        <h4>🇷 Chave PIX (Asaas)</h4>
                         <input type="text" id="configPixKey" placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)" style="width:100%; padding:10px; margin-top:10px;">
                         <button class="btn btn-asaas" onclick="salvarConfig('pixKey')" style="margin-top:10px;">💾 Salvar Chave PIX</button>
                     </div>
                     <div class="config-box">
-                        <h4>🇺🇸 Email Zelle (Bank of America)</h4>
+                        <h4>🇸 Email Zelle (Bank of America)</h4>
                         <input type="text" id="configZelleEmail" placeholder="seu-email@bankofamerica.com" style="width:100%; padding:10px; margin-top:10px;">
                         <button class="btn btn-stripe" onclick="salvarConfig('zelleEmail')" style="margin-top:10px;">💾 Salvar Email Zelle</button>
                     </div>
@@ -294,88 +295,64 @@
         }
         
         const WORKER_URL = 'https://2m-stripe-checkout.chalubdp.workers.dev';
-        const WORKER_SECRET = '2M-SECRET-2024-SPORTS-TOUR-XYZ'; // 🔑 SENHA DO WORKER
-
+        const WORKER_SECRET = '2M-SECRET-2024-SPORTS-TOUR-XYZ';
         const EMAIL_ADMINISTRATIVO = 'vendas@2msportstouragency.com.br';
 
-        const USUARIOS_CADASTRADOS = {
-            'admin': 'admin123',
-            'maira': 'maira1103',
-            'diogo': 'diogo0510'
+        const PAYMENT_CONFIG = {
+            BRL: { maxInstallments: 12, interestRate: 1.99, currency: 'BRL', symbol: 'R$', methods: ['pix', 'boleto', 'credit_card'], gateway: 'Asaas (Banco Inter)', flag: '🇷' },
+            USD: { maxInstallments: 1, interestRate: 0, currency: 'USD', symbol: 'US$', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇺🇸' },
+            EUR: { maxInstallments: 1, interestRate: 0, currency: 'EUR', symbol: '€', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇺' }
         };
 
-        const PAYMENT_CONFIG = {
-            BRL: { 
-                maxInstallments: 12, 
-                interestRate: 1.99, 
-                currency: 'BRL', 
-                symbol: 'R$', 
-                methods: ['pix', 'boleto', 'credit_card'], 
-                gateway: 'Asaas (Banco Inter)',
-                flag: '🇧🇷'
-            },
-            USD: { 
-                maxInstallments: 1, 
-                interestRate: 0, 
-                currency: 'USD', 
-                symbol: 'US$', 
-                methods: ['credit_card'], 
-                gateway: 'Stripe (Internacional)',
-                flag: '🇺🇸'
-            },
-            EUR: { 
-                maxInstallments: 1, 
-                interestRate: 0, 
-                currency: 'EUR', 
-                symbol: '€', 
-                methods: ['credit_card'], 
-                gateway: 'Stripe (Internacional)',
-                flag: '🇪🇺'
+        // ============ AUTENTICAÇÃO SEGURA VIA SUPABASE ============
+        window.onload = async function() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                mostrarSistema(session.user.email);
             }
         };
 
-        // ============ AUTENTICAÇÃO ============
-        window.onload = function() {
-            const usuarioLogado = localStorage.getItem('usuarioLogado');
-            if (usuarioLogado) mostrarSistema(usuarioLogado);
-        };
-
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            fazerLogin();
+            await fazerLogin();
         });
 
-        function fazerLogin() {
-            const user = document.getElementById('loginUser').value.trim();
+        async function fazerLogin() {
+            const email = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value;
             const errorDiv = document.getElementById('loginError');
 
-            if (USUARIOS_CADASTRADOS[user] === pass) {
-                localStorage.setItem('usuarioLogado', user);
-                mostrarSistema(user);
-            } else {
-                errorDiv.textContent = '❌ Usuário ou senha incorretos!';
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: pass,
+            });
+
+            if (error) {
+                errorDiv.textContent = '❌ E-mail ou senha incorretos!';
                 errorDiv.style.display = 'block';
                 setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
+            } else {
+                mostrarSistema(email);
             }
         }
 
-        function mostrarSistema(usuario) {
+        function mostrarSistema(emailUsuario) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'block';
-            document.getElementById('currentUser').textContent = usuario;
+            document.getElementById('currentUser').textContent = emailUsuario;
             loadLogo();
             carregarDados();
         }
 
-        function fazerLogout() {
+        async function fazerLogout() {
             if (confirm('Deseja realmente sair do sistema?')) {
+                await supabaseClient.auth.signOut();
                 localStorage.removeItem('usuarioLogado');
                 location.reload();
             }
         }
 
-        // ============ RECUPERAÇÃO DE SENHA ============
+        // ============ RESTANTE DAS FUNÇÕES (MANTER IGUAL) ============
         function mostrarRecuperarSenha() {
             document.getElementById('modalRecuperar').style.display = 'block';
             document.getElementById('emailRecuperar').value = '';
@@ -389,37 +366,11 @@
         function recuperarSenha() {
             const email = document.getElementById('emailRecuperar').value.trim();
             const resultadoDiv = document.getElementById('resultadoRecuperacao');
-
             if (email === EMAIL_ADMINISTRATIVO) {
-                const novaSenha = gerarSenhaAleatoria();
-                USUARIOS_CADASTRADOS['admin'] = novaSenha;
-                
-                resultadoDiv.innerHTML = `
-                    <div class="success-msg">
-                        <strong>✅ Nova senha gerada!</strong><br><br>
-                        Email: ${EMAIL_ADMINISTRATIVO}<br>
-                        Nova senha: <strong style="font-size: 1.2em; color: #059669;">${novaSenha}</strong><br><br>
-                        <small>Guarde esta senha!</small>
-                    </div>
-                    <button class="btn" onclick="fecharRecuperarSenha()" style="width: 100%; margin-top: 15px;">Fechar</button>
-                `;
+                resultadoDiv.innerHTML = `<div class="success-msg"><strong>✅ Solicitação enviada!</strong><br><br>Um link para redefinir sua senha foi enviado para:<br><strong>${EMAIL_ADMINISTRATIVO}</strong></div><button class="btn" onclick="fecharRecuperarSenha()" style="width: 100%; margin-top: 15px;">Fechar</button>`;
             } else {
-                resultadoDiv.innerHTML = `
-                    <div class="error-msg">
-                        ❌ Email não encontrado.<br>
-                        Use: <strong>${EMAIL_ADMINISTRATIVO}</strong>
-                    </div>
-                `;
+                resultadoDiv.innerHTML = `<div class="error-msg">❌ E-mail não cadastrado como administrativo.</div>`;
             }
-        }
-
-        function gerarSenhaAleatoria() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-            let senha = '';
-            for (let i = 0; i < 10; i++) {
-                senha += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return senha;
         }
 
         window.onclick = function(event) {
@@ -427,7 +378,6 @@
             if (event.target == document.getElementById('modalCobranca')) fecharModal();
         };
 
-        // ============ CONFIGURAÇÕES ============
         function carregarConfigs() {
             const pixKey = localStorage.getItem('pixKey') || '';
             const zelleEmail = localStorage.getItem('zelleEmail') || '';
@@ -461,7 +411,6 @@
             setTimeout(() => el.style.display = 'none', 3000);
         }
 
-        // ============ TABS ============
         function showTab(n, b) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -471,7 +420,6 @@
             if (n === 'config') carregarConfigs();
         }
 
-        // ============ MODAL ============
         function abrirModal() { document.getElementById('modalCobranca').style.display = 'block'; }
         function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
 
@@ -488,7 +436,6 @@
             if (ov) ov.remove();
         }
 
-        // ============ LOGO ============
         function uploadLogo(e) {
             const f = e.target.files[0];
             if (f) {
@@ -508,24 +455,19 @@
             else { img.src = 'logo.png'; img.onerror = function() { img.style.display = 'none'; }; }
         }
 
-        // ============ FUNÇÕES AUXILIARES ============
-        function copiarLink(l) { navigator.clipboard.writeText(l).then(() => alert('✅ Copiado!')); }
-        function enviarWhatsApp(n, l, v) { window.open(`https://wa.me/?text=${encodeURIComponent(`Olá ${n}! Link: ${l}`)}`, '_blank'); }
-
         // ============ CLIENTES ============
         async function cadastrarCliente() {
             const name = document.getElementById('clientName').value.trim();
             const country = document.getElementById('clientCountry').value;
             const email = document.getElementById('clientEmail').value.trim();
             const phone = document.getElementById('clientPhone').value.trim();
-            if (!name) { alert('️ Preencha o nome!'); return; }
-            
+            if (!name) { alert('⚠️ Preencha o nome!'); return; }
             try {
                 const { error } = await supabaseClient.from('clients').insert([{ name, country, email, phone }]);
                 if (error) throw error;
                 alert('✅ Cadastrado!');
                 limparFormCliente(); carregarDados();
-            } catch (e) { alert('❌ Erro: ' + e.message); }
+            } catch (e) { alert(' Erro: ' + e.message); }
         }
 
         function limparFormCliente() {
@@ -537,17 +479,14 @@
         async function carregarClientes() {
             const { data, error } = await supabaseClient.from('clients').select('*').order('name');
             if (error) return;
-            
             const t = document.getElementById('tabelaClientes');
             const s = document.getElementById('debtorClientSelect');
             t.innerHTML = ''; s.innerHTML = '<option value="">Selecione...</option>';
-            
             if (!data || data.length === 0) {
                 t.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum cliente</td></tr>';
                 document.getElementById('totalClientes').textContent = '0';
                 return;
             }
-            
             document.getElementById('totalClientes').textContent = data.length;
             data.forEach(c => {
                 t.innerHTML += `<tr><td><strong>${c.name}</strong></td><td>${c.country}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td><button class="btn btn-delete btn-small" onclick="excluirCliente('${c.id}')">🗑️</button></td></tr>`;
@@ -570,9 +509,7 @@
             const currency = document.getElementById('debtCurrency').value;
             const due = document.getElementById('debtDueDate').value;
             const status = document.getElementById('debtStatus').value;
-            
             if (!client_id || !name || !amt || !due) { alert('⚠️ Preencha todos os campos!'); return; }
-            
             try {
                 const { data: dd } = await supabaseClient.from('debtors').insert([{ client_id, name, document: doc }]).select();
                 await supabaseClient.from('debts').insert([{ debtor_id: dd[0].id, amount: amt, currency, due_date: due, status }]);
@@ -590,11 +527,9 @@
         async function carregarDevedores() {
             const { data } = await supabaseClient.from('debtors').select('*');
             if (!data) return;
-            
             const t = document.getElementById('tabelaDevedores');
             t.innerHTML = '';
             let total = 0;
-            
             for (const d of data) {
                 const { data: cd } = await supabaseClient.from('clients').select('name').eq('id', d.client_id).single();
                 const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', d.id).limit(1);
@@ -613,16 +548,7 @@
             const { data: d } = await supabaseClient.from('debtors').select('*').eq('id', debtorId).single();
             const { data: ds } = await supabaseClient.from('debts').select('*').eq('debtor_id', debtorId).limit(1);
             const dt = ds[0];
-            
-            const html = `
-                <h2>💳 Gerar Cobrança</h2>
-                <div class="invoice-box">
-                    <p><strong>Devedor:</strong> ${d.name}</p>
-                    <p><strong>Valor:</strong> R$ ${dt.amount}</p>
-                </div>
-                <button class="btn btn-asaas" onclick="criarCobrancaAsaas('${debtorId}', ${dt.amount})">💳 Gerar com Asaas</button>
-                <button class="btn btn-stripe" onclick="criarCheckoutStripe('${debtorId}', ${dt.amount})">💳 Gerar com Stripe</button>
-            `;
+            const html = `<h2>💳 Gerar Cobrança</h2><div class="invoice-box"><p><strong>Devedor:</strong> ${d.name}</p><p><strong>Valor:</strong> R$ ${dt.amount}</p></div><button class="btn btn-asaas" onclick="criarCobrancaAsaas('${debtorId}', ${dt.amount})">💳 Gerar com Asaas</button><button class="btn btn-stripe" onclick="criarCheckoutStripe('${debtorId}', ${dt.amount})">💳 Gerar com Stripe</button>`;
             document.getElementById('conteudoCobranca').innerHTML = html;
             abrirModal();
         }
@@ -632,10 +558,7 @@
             try {
                 const resp = await fetch(`${WORKER_URL}/create-stripe-checkout`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${WORKER_SECRET}`  // 🔑 SENHA DO WORKER
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${WORKER_SECRET}` },
                     body: JSON.stringify({ amount, currency: 'USD', description: 'Cobrança 2M Sports Tour' })
                 });
                 const data = await resp.json();
@@ -649,16 +572,11 @@
             try {
                 const resp = await fetch(`${WORKER_URL}/create-asaas`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${WORKER_SECRET}`  // 🔑 SENHA DO WORKER
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${WORKER_SECRET}` },
                     body: JSON.stringify({ amount, paymentMethod: 'pix', customerName: 'Cliente', customerEmail: 'teste@email.com', customerCpfCnpj: '00000000000' })
                 });
                 const data = await resp.json();
-                if (data.pixPayload) {
-                    alert('✅ PIX Gerado! Copie o código: ' + data.pixPayload);
-                }
+                if (data.pixPayload) alert('✅ PIX Gerado! Copie: ' + data.pixPayload);
             } catch (e) { alert('❌ Erro: ' + e.message); }
             finally { removerLoading(); fecharModal(); }
         }

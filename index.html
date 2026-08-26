@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2M Sports Tour - Sistema de Cobrança</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Cloudflare Turnstile -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -123,7 +121,7 @@
     </style>
 </head>
 <body>
-    <!-- TELA DE LOGIN COM CAPTCHA -->
+    <!-- TELA DE LOGIN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
             <div class="login-header">
@@ -140,14 +138,8 @@
                     <input type="email" id="loginUser" placeholder="Digite seu e-mail" required>
                 </div>
                 <div class="form-group">
-                    <label>🔒 Senha</label>
+                    <label> Senha</label>
                     <input type="password" id="loginPass" placeholder="Digite sua senha" required>
-                </div>
-                
-                <!-- Cloudflare Turnstile Widget -->
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAAEc7Tcyb1sZ5-yw8" data-callback="javascriptCallback" data-theme="light"></div>
-                <div id="turnstile-error" style="color: #dc2626; font-size: 0.85em; margin: 10px 0; display: none;">
-                    ⚠️ Verificação de segurança necessária
                 </div>
                 
                 <button type="button" class="btn-login" id="btnLogin" onclick="fazerLogin()">🔐 Entrar no Sistema</button>
@@ -165,7 +157,7 @@
     <div id="modalRecuperar" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close" onclick="fecharRecuperarSenha()">&times;</span>
-            <h2 style="margin-bottom: 20px; color: #2d3748;"> Recuperar Senha</h2>
+            <h2 style="margin-bottom: 20px; color: #2d3748;">🔑 Recuperar Senha</h2>
             <p style="margin-bottom: 20px; color: #718096;">Digite o email cadastrado:</p>
             
             <div class="form-group">
@@ -173,7 +165,7 @@
                 <input type="email" id="emailRecuperar" placeholder="vendas@2msportstouragency.com.br">
             </div>
             
-            <button class="btn" onclick="recuperarSenha()" style="width: 100%; padding: 14px;"> Enviar Nova Senha</button>
+            <button class="btn" onclick="recuperarSenha()" style="width: 100%; padding: 14px;">📧 Enviar Nova Senha</button>
             
             <div id="resultadoRecuperacao" style="margin-top: 20px;"></div>
         </div>
@@ -205,7 +197,7 @@
                 <button class="tab active" onclick="showTab('clientes', this)">👥 Clientes</button>
                 <button class="tab" onclick="showTab('devedores', this)">💰 Devedores</button>
                 <button class="tab" onclick="showTab('cobrancas', this)">💳 Cobranças</button>
-                <button class="tab" onclick="showTab('config', this)">️ Configurações</button>
+                <button class="tab" onclick="showTab('config', this)">⚙️ Configurações</button>
             </div>
 
             <div id="tab-clientes" class="tab-content active">
@@ -231,7 +223,7 @@
 
             <div id="tab-devedores" class="tab-content">
                 <div class="card">
-                    <h2>💰 Cadastrar Novo Devedor e Título</h2>
+                    <h2> Cadastrar Novo Devedor e Título</h2>
                     <div class="form-group"><label>Credor Responsável *</label><select id="debtorClientSelect"><option value="">Carregando...</option></select></div>
                     <div class="form-row">
                         <div class="form-group"><label>Nome do Devedor *</label><input type="text" id="debtorName" placeholder="Nome completo"></div>
@@ -251,7 +243,7 @@
                     <input type="hidden" id="editDebtorId"><input type="hidden" id="editDebtId">
                 </div>
                 <div class="card">
-                    <h2>📊 Devedores Cadastrados</h2>
+                    <h2> Devedores Cadastrados</h2>
                     <div class="table-container"><table><thead><tr><th>DEVEDOR</th><th>DOCUMENTO</th><th>CREDOR</th><th>VALOR</th><th>VENCIMENTO</th><th>STATUS</th><th>AÇÕES</th></tr></thead><tbody id="tabelaDevedores"></tbody></table></div>
                 </div>
             </div>
@@ -308,21 +300,14 @@
         const EMAIL_ADMINISTRATIVO = 'vendas@2msportstouragency.com.br';
 
         const PAYMENT_CONFIG = {
-            BRL: { maxInstallments: 12, interestRate: 1.99, currency: 'BRL', symbol: 'R$', methods: ['pix', 'boleto', 'credit_card'], gateway: 'Asaas (Banco Inter)', flag: '🇷' },
-            USD: { maxInstallments: 1, interestRate: 0, currency: 'USD', symbol: 'US$', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇺🇸' },
-            EUR: { maxInstallments: 1, interestRate: 0, currency: 'EUR', symbol: '€', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇺' }
+            BRL: { maxInstallments: 12, interestRate: 1.99, currency: 'BRL', symbol: 'R$', methods: ['pix', 'boleto', 'credit_card'], gateway: 'Asaas (Banco Inter)', flag: '🇧🇷' },
+            USD: { maxInstallments: 1, interestRate: 0, currency: 'USD', symbol: 'US$', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇺' },
+            EUR: { maxInstallments: 1, interestRate: 0, currency: 'EUR', symbol: '€', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇪🇺' }
         };
 
         // ============ CONTROLE DE TENTATIVAS DE LOGIN ============
         const MAX_TENTATIVAS = 5;
         const BLOQUEIO_MINUTOS = 5;
-        let turnstileToken = null;
-
-        // Callback do Turnstile
-        function javascriptCallback(token) {
-            turnstileToken = token;
-            document.getElementById('turnstile-error').style.display = 'none';
-        }
 
         // ============ AUTENTICAÇÃO SEGURA VIA SUPABASE ============
         window.onload = async function() {
@@ -338,7 +323,7 @@
             const errorDiv = document.getElementById('loginError');
             const btnLogin = document.getElementById('btnLogin');
             
-            // 🔒 Verificar se está bloqueado
+            // Verificar se está bloqueado
             const bloqueio = JSON.parse(localStorage.getItem('loginBloqueio') || '{}');
             if (bloqueio.fim && Date.now() < bloqueio.fim) {
                 const minutosRestantes = Math.ceil((bloqueio.fim - Date.now()) / 60000);
@@ -350,60 +335,59 @@
                 localStorage.removeItem('tentativasLogin');
             }
             
-            // Verificar Turnstile
-            if (!turnstileToken) {
-                document.getElementById('turnstile-error').style.display = 'block';
-                errorDiv.innerHTML = '⚠️ Por favor, complete a verificação de segurança.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
             // Contar tentativas
             let tentativas = parseInt(localStorage.getItem('tentativasLogin') || '0');
             
             btnLogin.disabled = true;
             btnLogin.textContent = '⏳ Entrando...';
             
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: pass,
-            });
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: pass,
+                });
 
-            if (error) {
-                tentativas++;
-                localStorage.setItem('tentativasLogin', tentativas.toString());
-                
-                const restantes = MAX_TENTATIVAS - tentativas;
-                
-                if (tentativas >= MAX_TENTATIVAS) {
-                    // 🔒 BLOQUEAR POR 5 MINUTOS
-                    const bloqueio = {
-                        inicio: Date.now(),
-                        fim: Date.now() + (BLOQUEIO_MINUTOS * 60 * 1000)
-                    };
-                    localStorage.setItem('loginBloqueio', JSON.stringify(bloqueio));
+                if (error) {
+                    console.error('Erro de login:', error);
+                    tentativas++;
+                    localStorage.setItem('tentativasLogin', tentativas.toString());
                     
-                    errorDiv.innerHTML = `🔒 <strong>CONTA BLOQUEADA!</strong><br>Você errou ${MAX_TENTATIVAS} vezes.<br>Tente novamente em ${BLOQUEIO_MINUTOS} minutos.`;
-                    errorDiv.style.background = '#fee2e2';
-                    errorDiv.style.color = '#dc2626';
-                    errorDiv.style.display = 'block';
+                    const restantes = MAX_TENTATIVAS - tentativas;
                     
-                    localStorage.removeItem('tentativasLogin');
+                    if (tentativas >= MAX_TENTATIVAS) {
+                        const bloqueio = {
+                            inicio: Date.now(),
+                            fim: Date.now() + (BLOQUEIO_MINUTOS * 60 * 1000)
+                        };
+                        localStorage.setItem('loginBloqueio', JSON.stringify(bloqueio));
+                        
+                        errorDiv.innerHTML = ` <strong>CONTA BLOQUEADA!</strong><br>Você errou ${MAX_TENTATIVAS} vezes.<br>Tente novamente em ${BLOQUEIO_MINUTOS} minutos.`;
+                        errorDiv.style.background = '#fee2e2';
+                        errorDiv.style.color = '#dc2626';
+                        errorDiv.style.display = 'block';
+                        localStorage.removeItem('tentativasLogin');
+                    } else {
+                        errorDiv.innerHTML = `❌ E-mail ou senha incorretos!<br><small>Tentativa ${tentativas} de ${MAX_TENTATIVAS}. Restam ${restantes}.</small>`;
+                        errorDiv.style.background = '#fef5e7';
+                        errorDiv.style.color = '#d97706';
+                        errorDiv.style.display = 'block';
+                    }
+                    
+                    setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+                    btnLogin.disabled = false;
+                    btnLogin.textContent = '🔐 Entrar no Sistema';
                 } else {
-                    errorDiv.innerHTML = `❌ E-mail ou senha incorretos!<br><small>Tentativa ${tentativas} de ${MAX_TENTATIVAS}. Restam ${restantes}.</small>`;
-                    errorDiv.style.background = '#fef5e7';
-                    errorDiv.style.color = '#d97706';
-                    errorDiv.style.display = 'block';
+                    console.log('Login bem-sucedido:', data.user);
+                    localStorage.removeItem('tentativasLogin');
+                    localStorage.removeItem('loginBloqueio');
+                    mostrarSistema(email);
                 }
-                
-                setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+            } catch (err) {
+                console.error('Erro inesperado:', err);
+                errorDiv.textContent = '❌ Erro ao conectar. Tente novamente.';
+                errorDiv.style.display = 'block';
                 btnLogin.disabled = false;
                 btnLogin.textContent = '🔐 Entrar no Sistema';
-            } else {
-                // ✅ Login com sucesso - limpar tentativas
-                localStorage.removeItem('tentativasLogin');
-                localStorage.removeItem('loginBloqueio');
-                mostrarSistema(email);
             }
         }
 
@@ -440,7 +424,7 @@
             if (email === EMAIL_ADMINISTRATIVO) {
                 resultadoDiv.innerHTML = `<div class="success-msg"><strong>✅ Solicitação enviada!</strong><br><br>Um link para redefinir sua senha foi enviado para:<br><strong>${EMAIL_ADMINISTRATIVO}</strong></div><button class="btn" onclick="fecharRecuperarSenha()" style="width: 100%; margin-top: 15px;">Fechar</button>`;
             } else {
-                resultadoDiv.innerHTML = `<div class="error-msg"> E-mail não cadastrado como administrativo.</div>`;
+                resultadoDiv.innerHTML = `<div class="error-msg">❌ E-mail não cadastrado como administrativo.</div>`;
             }
         }
 
@@ -532,7 +516,7 @@
             const country = document.getElementById('clientCountry').value;
             const email = document.getElementById('clientEmail').value.trim();
             const phone = document.getElementById('clientPhone').value.trim();
-            if (!name) { alert('⚠️ Preencha o nome!'); return; }
+            if (!name) { alert('️ Preencha o nome!'); return; }
             try {
                 const { error } = await supabaseClient.from('clients').insert([{ name, country, email, phone }]);
                 if (error) throw error;

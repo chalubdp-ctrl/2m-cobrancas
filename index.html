@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2M Sports Tour - Sistema de Cobrança</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,6 +26,7 @@
         .login-form input { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em; }
         .login-form input:focus { outline: none; border-color: #667eea; }
         .login-form .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; }
+        .login-form .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
         .login-form .btn-forgot { width: 100%; padding: 10px; background: transparent; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-size: 0.95em; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .login-form .btn-forgot:hover { background: #f0f4ff; }
         .login-error { background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; }
@@ -120,7 +123,7 @@
     </style>
 </head>
 <body>
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE LOGIN COM CAPTCHA -->
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
             <div class="login-header">
@@ -131,8 +134,7 @@
             <div class="login-error" id="loginError"></div>
             <div class="login-success" id="loginSuccess"></div>
             
-            <!-- Formulário de Login -->
-            <form class="login-form" id="loginForm">
+            <form class="login-form" id="loginForm" onsubmit="event.preventDefault();">
                 <div class="form-group">
                     <label>👤 E-mail</label>
                     <input type="email" id="loginUser" placeholder="Digite seu e-mail" required>
@@ -141,7 +143,14 @@
                     <label>🔒 Senha</label>
                     <input type="password" id="loginPass" placeholder="Digite sua senha" required>
                 </div>
-                <button type="submit" class="btn-login">🔐 Entrar no Sistema</button>
+                
+                <!-- Cloudflare Turnstile Widget -->
+                <div class="cf-turnstile" data-sitekey="SUA_SITE_KEY_AQUI" data-callback="javascriptCallback" data-theme="light"></div>
+                <div id="turnstile-error" style="color: #dc2626; font-size: 0.85em; margin: 10px 0; display: none;">
+                    ⚠️ Verificação de segurança necessária
+                </div>
+                
+                <button type="button" class="btn-login" id="btnLogin" onclick="fazerLogin()">🔐 Entrar no Sistema</button>
                 <button type="button" class="btn-forgot" onclick="mostrarRecuperarSenha()">🔑 Esqueci minha senha</button>
             </form>
             
@@ -196,7 +205,7 @@
                 <button class="tab active" onclick="showTab('clientes', this)">👥 Clientes</button>
                 <button class="tab" onclick="showTab('devedores', this)">💰 Devedores</button>
                 <button class="tab" onclick="showTab('cobrancas', this)">💳 Cobranças</button>
-                <button class="tab" onclick="showTab('config', this)">⚙️ Configurações</button>
+                <button class="tab" onclick="showTab('config', this)">️ Configurações</button>
             </div>
 
             <div id="tab-clientes" class="tab-content active">
@@ -260,12 +269,12 @@
                     <div id="configStatusPix" class="config-status" style="display:none;"></div>
                     <div id="configStatusZelle" class="config-status" style="display:none;"></div>
                     <div class="config-box">
-                        <h4>🇷 Chave PIX (Asaas)</h4>
+                        <h4>🇧🇷 Chave PIX (Asaas)</h4>
                         <input type="text" id="configPixKey" placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)" style="width:100%; padding:10px; margin-top:10px;">
                         <button class="btn btn-asaas" onclick="salvarConfig('pixKey')" style="margin-top:10px;">💾 Salvar Chave PIX</button>
                     </div>
                     <div class="config-box">
-                        <h4>🇸 Email Zelle (Bank of America)</h4>
+                        <h4>🇺🇸 Email Zelle (Bank of America)</h4>
                         <input type="text" id="configZelleEmail" placeholder="seu-email@bankofamerica.com" style="width:100%; padding:10px; margin-top:10px;">
                         <button class="btn btn-stripe" onclick="salvarConfig('zelleEmail')" style="margin-top:10px;">💾 Salvar Email Zelle</button>
                     </div>
@@ -304,6 +313,17 @@
             EUR: { maxInstallments: 1, interestRate: 0, currency: 'EUR', symbol: '€', methods: ['credit_card'], gateway: 'Stripe (Internacional)', flag: '🇺' }
         };
 
+        // ============ CONTROLE DE TENTATIVAS DE LOGIN ============
+        const MAX_TENTATIVAS = 5;
+        const BLOQUEIO_MINUTOS = 5;
+        let turnstileToken = null;
+
+        // Callback do Turnstile
+        function javascriptCallback(token) {
+            turnstileToken = token;
+            document.getElementById('turnstile-error').style.display = 'none';
+        }
+
         // ============ AUTENTICAÇÃO SEGURA VIA SUPABASE ============
         window.onload = async function() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -312,26 +332,77 @@
             }
         };
 
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await fazerLogin();
-        });
-
         async function fazerLogin() {
             const email = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value;
             const errorDiv = document.getElementById('loginError');
-
+            const btnLogin = document.getElementById('btnLogin');
+            
+            // 🔒 Verificar se está bloqueado
+            const bloqueio = JSON.parse(localStorage.getItem('loginBloqueio') || '{}');
+            if (bloqueio.fim && Date.now() < bloqueio.fim) {
+                const minutosRestantes = Math.ceil((bloqueio.fim - Date.now()) / 60000);
+                errorDiv.innerHTML = `🔒 <strong>Conta bloqueada!</strong><br>Tente novamente em ${minutosRestantes} minuto(s).<br><small>Muitas tentativas incorretas.</small>`;
+                errorDiv.style.display = 'block';
+                return;
+            } else if (bloqueio.fim && Date.now() >= bloqueio.fim) {
+                localStorage.removeItem('loginBloqueio');
+                localStorage.removeItem('tentativasLogin');
+            }
+            
+            // Verificar Turnstile
+            if (!turnstileToken) {
+                document.getElementById('turnstile-error').style.display = 'block';
+                errorDiv.innerHTML = '⚠️ Por favor, complete a verificação de segurança.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Contar tentativas
+            let tentativas = parseInt(localStorage.getItem('tentativasLogin') || '0');
+            
+            btnLogin.disabled = true;
+            btnLogin.textContent = '⏳ Entrando...';
+            
             const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: pass,
             });
 
             if (error) {
-                errorDiv.textContent = '❌ E-mail ou senha incorretos!';
-                errorDiv.style.display = 'block';
-                setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
+                tentativas++;
+                localStorage.setItem('tentativasLogin', tentativas.toString());
+                
+                const restantes = MAX_TENTATIVAS - tentativas;
+                
+                if (tentativas >= MAX_TENTATIVAS) {
+                    // 🔒 BLOQUEAR POR 5 MINUTOS
+                    const bloqueio = {
+                        inicio: Date.now(),
+                        fim: Date.now() + (BLOQUEIO_MINUTOS * 60 * 1000)
+                    };
+                    localStorage.setItem('loginBloqueio', JSON.stringify(bloqueio));
+                    
+                    errorDiv.innerHTML = `🔒 <strong>CONTA BLOQUEADA!</strong><br>Você errou ${MAX_TENTATIVAS} vezes.<br>Tente novamente em ${BLOQUEIO_MINUTOS} minutos.`;
+                    errorDiv.style.background = '#fee2e2';
+                    errorDiv.style.color = '#dc2626';
+                    errorDiv.style.display = 'block';
+                    
+                    localStorage.removeItem('tentativasLogin');
+                } else {
+                    errorDiv.innerHTML = `❌ E-mail ou senha incorretos!<br><small>Tentativa ${tentativas} de ${MAX_TENTATIVAS}. Restam ${restantes}.</small>`;
+                    errorDiv.style.background = '#fef5e7';
+                    errorDiv.style.color = '#d97706';
+                    errorDiv.style.display = 'block';
+                }
+                
+                setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+                btnLogin.disabled = false;
+                btnLogin.textContent = '🔐 Entrar no Sistema';
             } else {
+                // ✅ Login com sucesso - limpar tentativas
+                localStorage.removeItem('tentativasLogin');
+                localStorage.removeItem('loginBloqueio');
                 mostrarSistema(email);
             }
         }
@@ -352,7 +423,7 @@
             }
         }
 
-        // ============ RESTANTE DAS FUNÇÕES (MANTER IGUAL) ============
+        // ============ RESTANTE DAS FUNÇÕES ============
         function mostrarRecuperarSenha() {
             document.getElementById('modalRecuperar').style.display = 'block';
             document.getElementById('emailRecuperar').value = '';
@@ -369,7 +440,7 @@
             if (email === EMAIL_ADMINISTRATIVO) {
                 resultadoDiv.innerHTML = `<div class="success-msg"><strong>✅ Solicitação enviada!</strong><br><br>Um link para redefinir sua senha foi enviado para:<br><strong>${EMAIL_ADMINISTRATIVO}</strong></div><button class="btn" onclick="fecharRecuperarSenha()" style="width: 100%; margin-top: 15px;">Fechar</button>`;
             } else {
-                resultadoDiv.innerHTML = `<div class="error-msg">❌ E-mail não cadastrado como administrativo.</div>`;
+                resultadoDiv.innerHTML = `<div class="error-msg"> E-mail não cadastrado como administrativo.</div>`;
             }
         }
 
@@ -467,7 +538,7 @@
                 if (error) throw error;
                 alert('✅ Cadastrado!');
                 limparFormCliente(); carregarDados();
-            } catch (e) { alert(' Erro: ' + e.message); }
+            } catch (e) { alert('❌ Erro: ' + e.message); }
         }
 
         function limparFormCliente() {
